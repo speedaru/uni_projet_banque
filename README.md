@@ -141,10 +141,11 @@ Pas de format imposé (pas de préfixe Epic/US obligatoire) — un message clair
 
 - [`docs/scope-and-stack.fr.md`](docs/scope-and-stack.fr.md) — périmètre fonctionnel, stack technique, modèle de données, stratégie de tests, déploiement (version française)
 - [`docs/scope-and-stack.md`](docs/scope-and-stack.md) — même contenu, version anglaise (référence pour `CLAUDE.md`)
+- [`docs/equipe-et-planning.md`](docs/equipe-et-planning.md) — rôles de l'équipe, responsabilités, phases du projet et planning
 - [`docs/`](docs/) — documents fournis par le Product Owner (sujet, spécifications fonctionnelles, backlog produit)
 - [`CLAUDE.md`](CLAUDE.md) — conventions de développement (nommage, style de code, workflow Git)
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — pipeline d'intégration continue
 
 ## Équipe
 
-Équipe de 5 : 1 Scrum Master, 1 Technical Leader, 3 Développeurs/testeurs. Tout le monde participe au développement, aux tests et à la rédaction des livrables.
+Équipe de 5 : 1 Scrum Master, 1 Technical Leader, 3 Développeurs/testeurs. Tout le monde participe au développement, aux tests et à la rédaction des livrables. Détail des rôles, des responsabilités et du planning par phase dans [`docs/equipe-et-planning.md`](docs/equipe-et-planning.md).
