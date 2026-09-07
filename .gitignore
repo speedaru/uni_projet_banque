@@ -1,0 +1,33 @@
+# Dépendances
+node_modules/
+
+# Build
+dist/
+build/
+
+# Environnement (secrets locaux, jamais commités)
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+*.log
+
+# Tests / couverture
+coverage/
+
+# Prisma (base de données locale de dev si sqlite est utilisé ponctuellement)
+*.db
+*.db-journal
+
+# Éditeur / OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+
+# Puppeteer (cache Chromium local, si jamais installé hors node_modules)
+.cache/
+
+/src/generated/prisma

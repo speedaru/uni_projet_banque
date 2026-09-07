@@ -1,0 +1,26 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #1a1a1a;
+  background: #f7f7f7;
+}
+
+header {
+  background: #0b3d91;
+  color: #fff;
+  padding: 1rem 2rem;
+}
+
+main {
+  padding: 2rem;
+}
+
+footer {
+  padding: 1rem 2rem;
+  color: #666;
+  font-size: 0.85rem;
+}

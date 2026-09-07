@@ -1,0 +1,34 @@
+import express from 'express';
+import session from 'express-session';
+import path from 'node:path';
+
+import { indexRouter } from './routes/index';
+
+export function createApp() {
+  const app = express();
+
+  app.set('view engine', 'ejs');
+  app.set('views', path.join(__dirname, '..', 'views'));
+
+  app.use(express.static(path.join(__dirname, '..', 'public')));
+  app.use(
+    '/vendor/chart.js',
+    express.static(path.join(__dirname, '..', 'node_modules', 'chart.js', 'dist')),
+  );
+
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
+
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET ?? 'change-me',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { httpOnly: true },
+    }),
+  );
+
+  app.use('/', indexRouter);
+
+  return app;
+}

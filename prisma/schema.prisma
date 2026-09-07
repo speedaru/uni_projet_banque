@@ -1,0 +1,17 @@
+// Schéma Prisma — source de vérité du MCD/MPD (dossier de conception technique)
+// Modèles (Utilisateur, Entreprise, Remise, Transaction, Impaye, MotifImpaye) à ajouter
+// au fur et à mesure du développement des epics. Voir docs/scope-and-stack.fr.md §4.
+//
+// moduleFormat = "cjs" : le client généré reste en CommonJS pour matcher le reste
+// du projet (tsconfig.json module=commonjs) et éviter la complexité d'un setup ESM
+// (notamment avec Jest) pour une équipe qui découvre déjà Node/Express/TypeScript.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
