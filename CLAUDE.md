@@ -34,6 +34,10 @@ ESLint + Prettier, enforced (not just advisory). Set up as a pre-commit hook or 
 - Commit messages: free-form, but clear and descriptive (no fixed Epic/US-ID prefix convention).
 - Tests must pass before a PR merges. New logic in `services/`/`controllers/` should come with Jest/Supertest tests — this is both a quality bar and groundwork for the _cahier de tests_ deliverable.
 
+## Documentation upkeep
+
+Whenever a change makes something in `README.md` inaccurate or incomplete — setup/install steps, prerequisites, npm scripts, project structure, environment variables, git workflow/hooks, or available features — update `README.md` as part of that same change, not as a follow-up. Don't let it drift out of sync with the actual repo state.
+
 ## Architecture reminders
 
 Layered Express app: `routes/` → `controllers/` → `services/` → Prisma. No separate REST API for the browser UI (views render server-side); only chart data goes through a small JSON endpoint. Full breakdown in `docs/scope-and-stack.md` §6.
