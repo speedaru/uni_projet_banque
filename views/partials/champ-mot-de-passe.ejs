@@ -1,0 +1,17 @@
+<%# Champ mot de passe avec le bouton « l'œil » (Epic 6, TS6) — paramètres : autocomplete, minlength %>
+<div class="champ-icone champ-mot-de-passe">
+  <%- icon('lock', 18) %>
+  <input
+    id="password"
+    name="password"
+    type="password"
+    autocomplete="<%= autocomplete %>"
+    <% if (locals.minlength) { %>minlength="<%= minlength %>"<% } %>
+    required
+  />
+  <button type="button" class="bouton-oeil" data-cible="password" aria-label="Afficher le mot de passe" aria-pressed="false">
+    <span class="oeil-ouvert"><%- icon('eye', 18) %></span>
+    <span class="oeil-ferme"><%- icon('eye-off', 18) %></span>
+  </button>
+</div>
+<script src="/js/mot-de-passe.js" defer></script>

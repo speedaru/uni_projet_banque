@@ -1,0 +1,10 @@
+<%# En-tête de page : icône, titre et sous-titre (paramètres : titre, sousTitre, icone) %>
+<div class="page-titre">
+  <span class="page-titre-icone"><%- icon(icone, 24) %></span>
+  <div>
+    <h1><%= titre %></h1>
+    <% if (locals.sousTitre) { %>
+    <p><%= sousTitre %></p>
+    <% } %>
+  </div>
+</div>

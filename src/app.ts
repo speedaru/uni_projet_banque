@@ -3,14 +3,17 @@ import session from 'express-session';
 import path from 'node:path';
 
 import { formatAmount, formatIsoDate } from './lib/format';
+import { icon } from './lib/icons';
 import './lib/session';
 import { createAdminPagesRouter } from './routes/admin';
 import { createAuthRouter } from './routes/auth';
 import { createBusinessPagesRouter } from './routes/business';
 import { indexRouter } from './routes/index';
 import { createRoleRouter } from './routes/roles';
+import { prismaRemiseRepository } from './services/prismaRemiseRepository';
 import { prismaTreasuryRepository } from './services/prismaTreasuryRepository';
 import { prismaUserRepository } from './services/prismaUserRepository';
+import type { RemiseRepository } from './services/remiseRepository';
 import type { TreasuryRepository } from './services/treasuryRepository';
 import type { UserRepository } from './services/userRepository';
 
@@ -19,11 +22,13 @@ import type { UserRepository } from './services/userRepository';
 export interface AppDependencies {
   users?: UserRepository;
   treasury?: TreasuryRepository;
+  remises?: RemiseRepository;
 }
 
 export function createApp({
   users = prismaUserRepository,
   treasury = prismaTreasuryRepository,
+  remises = prismaRemiseRepository,
 }: AppDependencies = {}) {
   const app = express();
 
@@ -33,6 +38,7 @@ export function createApp({
   // Fonctions de formatage disponibles dans toutes les vues
   app.locals.formatAmount = formatAmount;
   app.locals.formatIsoDate = formatIsoDate;
+  app.locals.icon = icon;
 
   app.use(express.static(path.join(__dirname, '..', 'public')));
   app.use(
@@ -61,8 +67,8 @@ export function createApp({
   app.use('/', indexRouter);
   app.use(createAuthRouter(users));
   app.use(createRoleRouter('admin', createAdminPagesRouter(users)));
-  app.use(createRoleRouter('po', createBusinessPagesRouter('/po', { treasury })));
-  app.use(createRoleRouter('client', createBusinessPagesRouter('/client', { treasury })));
+  app.use(createRoleRouter('po', createBusinessPagesRouter('/po', { treasury, remises })));
+  app.use(createRoleRouter('client', createBusinessPagesRouter('/client', { treasury, remises })));
 
   return app;
 }

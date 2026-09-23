@@ -1,32 +1,35 @@
-<!doctype html>
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= titre %></title>
-    <link rel="stylesheet" href="/css/style.css" />
-  </head>
+<%- include('head', { titre }) %>
   <body>
-    <header>
-      <h1>Portail Web Monétique</h1>
-      <% if (locals.navigation) { %>
-      <%# Menu de l'espace courant (admin/po/client), fourni par src/routes/roles.ts %>
-      <nav class="nav-principale" aria-label="Menu principal">
-        <span class="nav-role">Espace <%= roleLabel %></span>
-        <ul>
-          <% navigation.forEach((link) => { %>
-          <li>
-            <a href="<%= link.href %>" <%- link.href === currentPath ? 'aria-current="page"' : '' %>><%= link.label %></a>
-          </li>
-          <% }) %>
-        </ul>
-        <% if (locals.user) { %>
-        <form class="deconnexion" method="post" action="/deconnexion">
-          <span><%= user.login %></span>
-          <button type="submit">Déconnexion</button>
-        </form>
+    <header class="entete">
+      <div class="entete-contenu">
+        <a class="marque" href="<%= locals.navigation ? navigation[0].href : '/' %>">
+          <img src="/img/logo.svg" alt="" width="36" height="36" />
+          <span><strong>Portail Web</strong> Monétique</span>
+        </a>
+        <% if (locals.navigation) { %>
+        <%# Menu de l'espace courant (admin/po/client), fourni par src/routes/roles.ts %>
+        <nav class="nav-principale" aria-label="Menu principal">
+          <ul>
+            <% navigation.forEach((link) => { %>
+            <li>
+              <a href="<%= link.href %>" <%- link.href === currentPath ? 'aria-current="page"' : '' %> title="<%= link.label %>"><%- icon(link.icon, 18) %><span><%= link.label %></span></a>
+            </li>
+            <% }) %>
+          </ul>
+        </nav>
         <% } %>
-      </nav>
-      <% } %>
+        <% if (locals.user && locals.roleLabel) { %>
+        <div class="utilisateur">
+          <span class="avatar" aria-hidden="true"><%= user.login.slice(0, 2).toUpperCase() %></span>
+          <span class="utilisateur-infos">
+            <strong><%= user.login %></strong>
+            <small>Espace <%= roleLabel %></small>
+          </span>
+          <form class="deconnexion" method="post" action="/deconnexion">
+            <button type="submit" title="Se déconnecter"><%- icon('logout', 18) %><span>Déconnexion</span></button>
+          </form>
+        </div>
+        <% } %>
+      </div>
     </header>
-    <main>
+    <main class="contenu">

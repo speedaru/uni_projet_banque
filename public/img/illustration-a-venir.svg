@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 180" role="img" aria-label="Écran en construction">
+  <!-- Sol -->
+  <ellipse cx="130" cy="160" rx="100" ry="10" fill="#e2e7f0"/>
+  <!-- Écran -->
+  <rect x="50" y="30" width="160" height="110" rx="12" fill="#ffffff" stroke="#d0d7e5" stroke-width="2"/>
+  <rect x="50" y="30" width="160" height="24" rx="12" fill="#eef2fb"/>
+  <rect x="50" y="44" width="160" height="10" fill="#eef2fb"/>
+  <circle cx="66" cy="42" r="4" fill="#f97066"/>
+  <circle cx="79" cy="42" r="4" fill="#fdb022"/>
+  <circle cx="92" cy="42" r="4" fill="#32d583"/>
+  <!-- Contenu en pointillés -->
+  <rect x="68" y="70" width="80" height="8" rx="4" fill="#d0d7e5"/>
+  <rect x="68" y="86" width="120" height="8" rx="4" fill="#e2e7f0"/>
+  <rect x="68" y="102" width="100" height="8" rx="4" fill="#e2e7f0"/>
+  <rect x="68" y="118" width="60" height="8" rx="4" fill="#e2e7f0"/>
+  <!-- Plot de chantier -->
+  <path d="M190 158 L204 104 L218 158 Z" fill="#f79009"/>
+  <path d="M195.5 137 h17 l2.3 9 h-21.6 Z" fill="#ffffff"/>
+  <path d="M199 123 h10 l1.6 6 h-13.2 Z" fill="#ffffff"/>
+  <rect x="184" y="156" width="40" height="6" rx="2" fill="#b54708"/>
+  <!-- Engrenage -->
+  <g transform="translate(58 140)">
+    <circle r="14" fill="#3b6cff"/>
+    <circle r="5" fill="#ffffff"/>
+    <g fill="#3b6cff">
+      <rect x="-3.5" y="-20" width="7" height="8" rx="1.5"/>
+      <rect x="-3.5" y="12" width="7" height="8" rx="1.5"/>
+      <rect x="-20" y="-3.5" width="8" height="7" rx="1.5"/>
+      <rect x="12" y="-3.5" width="8" height="7" rx="1.5"/>
+    </g>
+  </g>
+</svg>

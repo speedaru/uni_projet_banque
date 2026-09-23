@@ -1,3 +1,4 @@
+import { Query, readIsoDate, readSiren, text } from './searchCriteria';
 import type { TreasuryFilters, TreasuryRow } from './treasuryRepository';
 
 export type TreasurySortKey = 'siren' | 'montant';
@@ -8,40 +9,23 @@ export interface TreasurySort {
   order: SortOrder;
 }
 
-type Query = Record<string, unknown>;
-
-const text = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
-
 // Lit et vérifie les critères saisis dans le formulaire. Renvoie les filtres et les erreurs.
 export function parseTreasuryFilters(query: Query): { filters: TreasuryFilters; errors: string[] } {
   const errors: string[] = [];
-  const filters: TreasuryFilters = {};
+  const filters: TreasuryFilters = {
+    siren: readSiren(query.siren, errors),
+    raisonSociale: text(query.raisonSociale) || undefined,
+    dateValeur: readIsoDate(query.dateValeur, 'La date de valeur', errors),
+  };
 
-  // On accepte un SIREN saisi avec des espaces (ex. « 456 278 556 »)
-  const siren = text(query.siren).replace(/\s/g, '');
-  if (siren) {
-    if (/^\d{9}$/.test(siren)) {
-      filters.siren = siren;
-    } else {
-      errors.push('Le N° de SIREN doit contenir exactement 9 chiffres.');
-    }
-  }
+  return { filters: withoutEmpty(filters), errors };
+}
 
-  const raisonSociale = text(query.raisonSociale);
-  if (raisonSociale) {
-    filters.raisonSociale = raisonSociale;
-  }
-
-  const dateValeur = text(query.dateValeur);
-  if (dateValeur) {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateValeur) && !isNaN(Date.parse(dateValeur))) {
-      filters.dateValeur = dateValeur;
-    } else {
-      errors.push('La date de valeur est invalide.');
-    }
-  }
-
-  return { filters, errors };
+// Retire les critères non renseignés (valeur « tous »)
+export function withoutEmpty<T extends object>(filters: T): T {
+  return Object.fromEntries(
+    Object.entries(filters).filter(([, value]) => value !== undefined),
+  ) as T;
 }
 
 export function parseTreasurySort(query: Query): TreasurySort {
