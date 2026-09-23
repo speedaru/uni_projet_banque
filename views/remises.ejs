@@ -1,0 +1,181 @@
+<%- include('partials/header', { titre }) %>
+<%- include('partials/page-titre', {
+  icone: 'receipt',
+  sousTitre: isClient
+    ? 'Les remises de votre entreprise et le détail de leurs transactions.'
+    : 'Les remises de vos comptes clients et le détail de leurs transactions.',
+}) %>
+
+<%# Critères de sélection (spécifications, fonction 2.2) %>
+<form method="get" class="carte filtres">
+  <div class="champ">
+    <label for="siren">N° de SIREN</label>
+    <div class="champ-icone">
+      <%- icon('hash', 18) %>
+      <% if (isClient) { %>
+      <input id="siren" value="<%= clientSiren %>" readonly />
+      <% } else { %>
+      <input id="siren" name="siren" value="<%= filters.siren ?? '' %>" placeholder="Toutes" inputmode="numeric" maxlength="11" />
+      <% } %>
+    </div>
+  </div>
+  <div class="champ">
+    <label for="raisonSociale">Raison sociale</label>
+    <div class="champ-icone">
+      <%- icon('building', 18) %>
+      <% if (isClient) { %>
+      <input id="raisonSociale" value="<%= clientRaisonSociale %>" readonly />
+      <% } else { %>
+      <input id="raisonSociale" name="raisonSociale" value="<%= filters.raisonSociale ?? '' %>" placeholder="Toutes" maxlength="20" />
+      <% } %>
+    </div>
+  </div>
+  <div class="champ">
+    <label for="numero">N° de remise</label>
+    <div class="champ-icone">
+      <%- icon('search', 18) %>
+      <input id="numero" name="numero" value="<%= filters.numero ?? '' %>" placeholder="Ex. R000123" maxlength="10" />
+    </div>
+  </div>
+  <div class="champ">
+    <label for="dateDebut">Date de début</label>
+    <div class="champ-icone">
+      <%- icon('calendar', 18) %>
+      <input id="dateDebut" name="dateDebut" type="date" value="<%= filters.dateDebut ?? '' %>" />
+    </div>
+  </div>
+  <div class="champ">
+    <label for="dateFin">Date de fin</label>
+    <div class="champ-icone">
+      <%- icon('calendar', 18) %>
+      <input id="dateFin" name="dateFin" type="date" value="<%= filters.dateFin ?? '' %>" />
+    </div>
+  </div>
+  <div class="champ champ-etroit">
+    <label for="lignes">Lignes par page</label>
+    <select id="lignes" name="lignes" class="liste">
+      <% pageSizes.forEach((size) => { %>
+      <option value="<%= size %>" <%= size === pagination.pageSize ? 'selected' : '' %>><%= size %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="actions">
+    <button type="submit" class="bouton bouton-principal"><%- icon('search', 18) %> Rechercher</button>
+    <a class="bouton bouton-fantome" href="?"><%- icon('reset', 18) %> Réinitialiser</a>
+  </div>
+</form>
+
+<% if (errors.length > 0) { %>
+<div class="alerte alerte-erreur" role="alert">
+  <%- icon('info', 20) %>
+  <ul>
+    <% errors.forEach((error) => { %>
+    <li><%= error %></li>
+    <% }) %>
+  </ul>
+</div>
+<% } else { %>
+<section class="carte">
+  <div class="carte-entete">
+    <h2 class="carte-titre"><%- icon('receipt', 20) %> Remises</h2>
+    <%# Nombre total de résultats affiché au-dessus du tableau (Epic 2, US5) %>
+    <span class="pastille nombre-resultats"><%= result.total %> résultat<%= result.total > 1 ? 's' : '' %></span>
+  </div>
+
+  <% if (result.rows.length === 0) { %>
+  <div class="etat-vide etat-vide-compact">
+    <img src="/img/illustration-a-venir.svg" alt="" width="180" height="125" />
+    <p>Aucune remise pour ces critères.</p>
+  </div>
+  <% } else { %>
+  <p class="aide-tableau"><%- icon('info', 16) %> Cliquez sur une remise pour afficher le détail de ses transactions.</p>
+  <div class="tableau-conteneur">
+    <table class="tableau tableau-remises">
+      <thead>
+        <tr>
+          <th class="colonne-bouton"><span class="visuellement-cache">Détail</span></th>
+          <th>N° SIREN</th>
+          <th>Raison sociale</th>
+          <th>N° remise</th>
+          <th>Date traitement</th>
+          <th class="nombre">Nbre transactions</th>
+          <th>Devise</th>
+          <th class="nombre">Montant total</th>
+          <th class="centre">Sens</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% result.rows.forEach((row, index) => { %>
+        <%# Ligne principale : un clic (ou le bouton « + ») déplie le détail (Epic 2, US2) %>
+        <tr class="ligne-remise" data-detail="detail-<%= index %>">
+          <td class="colonne-bouton">
+            <button type="button" class="bouton-deplier" aria-expanded="false" aria-controls="detail-<%= index %>" aria-label="Afficher les transactions de la remise <%= row.numero %>">
+              <%- icon('plus', 16) %>
+            </button>
+          </td>
+          <td><%= row.siren %></td>
+          <td><%= row.raisonSociale %></td>
+          <td><span class="numero-remise"><%= row.numero %></span></td>
+          <td><%= formatIsoDate(row.dateTraitement) %></td>
+          <td class="nombre"><%= row.transactionCount %></td>
+          <td><span class="devise"><%= row.devise %></span></td>
+          <%# Montant négatif en rouge (Epic 2, US6) %>
+          <td class="nombre<%= row.totalAmount < 0 ? ' negatif' : '' %>"><%= formatAmount(row.totalAmount) %></td>
+          <td class="centre"><span class="sens <%= row.totalAmount < 0 ? 'sens-debit' : 'sens-credit' %>"><%= row.totalAmount < 0 ? '-' : '+' %></span></td>
+        </tr>
+        <tr class="ligne-detail" id="detail-<%= index %>" hidden>
+          <td colspan="9">
+            <div class="detail">
+              <h3 class="detail-titre"><%- icon('card', 18) %> Transactions de la remise <%= row.numero %></h3>
+              <table class="tableau tableau-detail">
+                <thead>
+                  <tr>
+                    <th>N° SIREN</th>
+                    <th>Date vente</th>
+                    <th>N° carte</th>
+                    <th>Réseau</th>
+                    <th>N° autorisation</th>
+                    <th>Devise</th>
+                    <th class="nombre">Montant</th>
+                    <th class="centre">Sens</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% row.transactions.forEach((transaction) => { %>
+                  <tr>
+                    <td><%= transaction.siren %></td>
+                    <td><%= formatIsoDate(transaction.dateVente) %></td>
+                    <td><span class="numero-carte"><%= transaction.numeroCarte %></span></td>
+                    <td><span class="reseau reseau-<%= transaction.reseau.toLowerCase() %>"><%= transaction.reseau %></span></td>
+                    <td><%= transaction.numeroAutorisation %></td>
+                    <td><span class="devise"><%= transaction.devise %></span></td>
+                    <td class="nombre<%= transaction.montant < 0 ? ' negatif' : '' %>"><%= formatAmount(transaction.montant) %></td>
+                    <td class="centre"><span class="sens <%= transaction.montant < 0 ? 'sens-debit' : 'sens-credit' %>"><%= transaction.montant < 0 ? '-' : '+' %></span></td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (totalPages > 1) { %>
+  <nav class="pagination" aria-label="Pagination">
+    <% if (pagination.page > 1) { %>
+    <a class="bouton bouton-secondaire bouton-petit" href="<%= pageUrl(pagination.page - 1) %>">← Précédente</a>
+    <% } %>
+    <span>Page <strong><%= pagination.page %></strong> sur <%= totalPages %></span>
+    <% if (pagination.page < totalPages) { %>
+    <a class="bouton bouton-secondaire bouton-petit" href="<%= pageUrl(pagination.page + 1) %>">Suivante →</a>
+    <% } %>
+  </nav>
+  <% } %>
+  <% } %>
+</section>
+<% } %>
+<script src="/js/remises.js" defer></script>
+<%- include('partials/footer') %>

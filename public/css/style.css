@@ -210,6 +210,7 @@ img {
 .utilisateur-infos small {
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.78rem;
+  white-space: nowrap;
 }
 
 .deconnexion button {
@@ -1054,6 +1055,192 @@ img {
 }
 
 /* 12. Écrans spécifiques --------------------------------------------------- */
+
+/* Texte réservé aux lecteurs d'écran */
+.visuellement-cache {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.champ-etroit {
+  flex: 0 1 140px !important;
+}
+
+.liste {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--texte);
+  font: inherit;
+}
+
+.liste:focus {
+  border-color: var(--primaire);
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.aide-tableau {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+  color: var(--texte-discret);
+  font-size: 0.85rem;
+}
+
+.tableau .centre {
+  text-align: center;
+}
+
+/* Remises : ligne principale cliquable (« petite main ») et détail dépliable */
+.ligne-remise {
+  cursor: pointer;
+}
+
+.ligne-remise.ligne-ouverte {
+  background: var(--primaire-clair) !important;
+}
+
+.colonne-bouton {
+  width: 48px;
+}
+
+.bouton-deplier {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--primaire);
+  cursor: pointer;
+  transition:
+    transform var(--transition),
+    background var(--transition);
+}
+
+.bouton-deplier:hover {
+  background: var(--primaire-clair);
+}
+
+.bouton-deplier[aria-expanded='true'] {
+  background: var(--primaire);
+  border-color: var(--primaire);
+  color: #fff;
+  transform: rotate(45deg);
+}
+
+.tableau tbody tr.ligne-detail,
+.tableau tbody tr.ligne-detail:hover {
+  background: #f7f9fc;
+}
+
+.ligne-detail > td {
+  padding: 0 1rem 1rem 3.5rem;
+}
+
+.detail {
+  padding: 1rem;
+  border: 1px solid var(--bordure);
+  border-left: 4px solid var(--primaire);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+}
+
+.detail-titre {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.detail-titre .icone {
+  color: var(--primaire);
+}
+
+.tableau-detail {
+  font-size: 0.86rem;
+}
+
+.tableau-detail th,
+.tableau-detail td {
+  padding: 0.55rem 0.8rem;
+}
+
+.numero-remise {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-weight: 600;
+}
+
+.numero-carte {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  letter-spacing: 0.03em;
+}
+
+/* Sens de l'opération : + crédit, - débit */
+.sens {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+.sens-credit {
+  background: var(--succes-clair);
+  color: var(--succes);
+}
+
+.sens-debit {
+  background: var(--danger-clair);
+  color: var(--danger);
+}
+
+/* Réseau de la carte */
+.reseau {
+  display: inline-block;
+  min-width: 32px;
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.reseau-cb {
+  background: #1b4f9c;
+}
+
+.reseau-vs {
+  background: #1a1f71;
+}
+
+.reseau-mc {
+  background: #eb5b1e;
+}
+
+.reseau-ae {
+  background: #2e77bb;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  color: var(--texte-secondaire);
+}
 .grille-admin {
   display: grid;
   grid-template-columns: minmax(300px, 380px) 1fr;
