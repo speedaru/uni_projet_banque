@@ -10,7 +10,7 @@ Le sujet impose 5 personnes maximum, avec ces rôles (jeu de rôles — **tout l
 | --------------------------- | -------------------------- | ------------------------- |
 | Technical Leader            | **Iegor**                  | _(propriétaire du dépôt)_ |
 | Scrum Master                | _[Prénom Nom — à choisir]_ | _[à compléter]_           |
-| Développeur·se / testeur·se | _[Prénom Nom — à choisir]_ | _[à compléter]_           |
+| Développeur·se / testeur·se | **Nasser CHEIKH**          | `floxi9314`               |
 | Développeur·se / testeur·se | _[Prénom Nom — à choisir]_ | _[à compléter]_           |
 | Développeur·se / testeur·se | _[Prénom Nom — à choisir]_ | _[à compléter]_           |
 
