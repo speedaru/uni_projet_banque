@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" role="img" aria-label="Tableau de bord monétique avec carte bancaire">
+  <defs>
+    <linearGradient id="carte" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b6cff"/>
+      <stop offset="1" stop-color="#6d4dff"/>
+    </linearGradient>
+    <linearGradient id="carte2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14b8a6"/>
+      <stop offset="1" stop-color="#0e9384"/>
+    </linearGradient>
+    <linearGradient id="aire" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14b8a6" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#14b8a6" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="ombre" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#020617" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Halo de fond -->
+  <circle cx="250" cy="180" r="150" fill="#ffffff" fill-opacity="0.05"/>
+  <circle cx="250" cy="180" r="105" fill="#ffffff" fill-opacity="0.05"/>
+
+  <!-- Fenêtre de tableau de bord -->
+  <g filter="url(#ombre)">
+    <rect x="70" y="60" width="300" height="200" rx="18" fill="#ffffff"/>
+    <rect x="70" y="60" width="300" height="38" rx="18" fill="#eef2fb"/>
+    <rect x="70" y="80" width="300" height="18" fill="#eef2fb"/>
+    <circle cx="94" cy="79" r="5" fill="#f97066"/>
+    <circle cx="111" cy="79" r="5" fill="#fdb022"/>
+    <circle cx="128" cy="79" r="5" fill="#32d583"/>
+
+    <!-- Indicateurs -->
+    <rect x="92" y="114" width="78" height="40" rx="8" fill="#f4f6fb"/>
+    <rect x="100" y="123" width="34" height="6" rx="3" fill="#98a2b3"/>
+    <rect x="100" y="136" width="54" height="9" rx="4" fill="#0b1b34"/>
+    <rect x="181" y="114" width="78" height="40" rx="8" fill="#f4f6fb"/>
+    <rect x="189" y="123" width="34" height="6" rx="3" fill="#98a2b3"/>
+    <rect x="189" y="136" width="46" height="9" rx="4" fill="#14b8a6"/>
+    <rect x="270" y="114" width="78" height="40" rx="8" fill="#fef3f2"/>
+    <rect x="278" y="123" width="34" height="6" rx="3" fill="#98a2b3"/>
+    <rect x="278" y="136" width="40" height="9" rx="4" fill="#d92d20"/>
+
+    <!-- Courbe de trésorerie -->
+    <path d="M92 236 L130 214 L162 222 L198 190 L232 200 L268 172 L306 182 L348 160 L348 244 L92 244 Z" fill="url(#aire)"/>
+    <path d="M92 236 L130 214 L162 222 L198 190 L232 200 L268 172 L306 182 L348 160" fill="none" stroke="#14b8a6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="348" cy="160" r="6" fill="#ffffff" stroke="#14b8a6" stroke-width="3"/>
+  </g>
+
+  <!-- Carte bancaire au premier plan -->
+  <g filter="url(#ombre)" transform="rotate(-8 360 270)">
+    <rect x="270" y="215" width="170" height="106" rx="14" fill="url(#carte)"/>
+    <rect x="288" y="240" width="30" height="22" rx="5" fill="#fdb022" fill-opacity="0.9"/>
+    <path d="M288 251h30M303 240v22" stroke="#b54708" stroke-opacity="0.35" stroke-width="1.5"/>
+    <rect x="288" y="279" width="120" height="8" rx="4" fill="#ffffff" fill-opacity="0.85"/>
+    <rect x="288" y="296" width="56" height="7" rx="3.5" fill="#ffffff" fill-opacity="0.55"/>
+    <circle cx="404" cy="302" r="11" fill="#f97066" fill-opacity="0.9"/>
+    <circle cx="418" cy="302" r="11" fill="#fdb022" fill-opacity="0.9"/>
+  </g>
+
+  <!-- Petite carte secondaire -->
+  <g filter="url(#ombre)" transform="rotate(10 60 250)">
+    <rect x="20" y="222" width="110" height="68" rx="10" fill="url(#carte2)"/>
+    <rect x="32" y="236" width="20" height="15" rx="3" fill="#ffffff" fill-opacity="0.8"/>
+    <rect x="32" y="266" width="76" height="6" rx="3" fill="#ffffff" fill-opacity="0.75"/>
+  </g>
+
+  <!-- Badge de sécurité -->
+  <g filter="url(#ombre)">
+    <circle cx="398" cy="72" r="30" fill="#ffffff"/>
+    <path d="M398 52 382 58v12c0 10 7 16 16 18 9-2 16-8 16-18V58z" fill="#ecfdf3" stroke="#12b76a" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="m391 70 5 5 9-10" fill="none" stroke="#12b76a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

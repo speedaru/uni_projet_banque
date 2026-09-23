@@ -1,0 +1,12 @@
+<%# Page d'accueil d'un espace : bandeau de bienvenue + raccourcis (paramètre : intro) %>
+<section class="hero">
+  <div class="hero-texte">
+    <span class="hero-badge"><%- icon('shield', 16) %> Espace <%= roleLabel %></span>
+    <h1>Bonjour, <%= user.login %></h1>
+    <p><%= intro %></p>
+  </div>
+  <img class="hero-illustration" src="/img/illustration-accueil.svg" alt="" width="320" height="200" />
+</section>
+
+<h2 class="section-titre">Accès rapide</h2>
+<%- include('raccourcis') %>

@@ -3,6 +3,7 @@ import session from 'express-session';
 import path from 'node:path';
 
 import { formatAmount, formatIsoDate } from './lib/format';
+import { icon } from './lib/icons';
 import './lib/session';
 import { createAdminPagesRouter } from './routes/admin';
 import { createAuthRouter } from './routes/auth';
@@ -33,6 +34,7 @@ export function createApp({
   // Fonctions de formatage disponibles dans toutes les vues
   app.locals.formatAmount = formatAmount;
   app.locals.formatIsoDate = formatIsoDate;
+  app.locals.icon = icon;
 
   app.use(express.static(path.join(__dirname, '..', 'public')));
   app.use(

@@ -1,6 +1,13 @@
 <%# Raccourcis vers les écrans de l'espace (tous les liens du menu sauf l'accueil) %>
 <ul class="raccourcis">
-  <% navigation.slice(1).forEach((link) => { %>
-  <li><a href="<%= link.href %>"><%= link.label %></a></li>
+  <% navigation.slice(1).forEach((link, index) => { %>
+  <li>
+    <a href="<%= link.href %>" class="raccourci teinte-<%= index % 4 %>">
+      <span class="raccourci-icone"><%- icon(link.icon, 24) %></span>
+      <strong><%= link.label %></strong>
+      <span class="raccourci-description"><%= link.description %></span>
+      <span class="raccourci-lien">Ouvrir <%- icon('arrow-right', 16) %></span>
+    </a>
+  </li>
   <% }) %>
 </ul>

@@ -1,38 +1,61 @@
-<%- include('partials/header', { titre }) %>
-<section class="connexion">
-  <h2>Connexion</h2>
-  <p>Administrateur, Product Owner ou Client : connectez-vous pour accéder à votre espace.</p>
+<%- include('partials/head', { titre }) %>
+  <body class="page-connexion">
+    <main class="connexion">
+      <%# Panneau de présentation (masqué sur mobile) %>
+      <section class="connexion-visuel">
+        <span class="marque marque-claire">
+          <img src="/img/logo.svg" alt="" width="40" height="40" />
+          <span><strong>Portail Web</strong> Monétique</span>
+        </span>
+        <div class="connexion-accroche">
+          <h1>Votre activité carte bancaire, claire et en un coup d'œil.</h1>
+          <p>Trésorerie, remises, impayés : toutes vos opérations réunies dans un seul portail sécurisé.</p>
+        </div>
+        <img class="connexion-illustration" src="/img/illustration-connexion.svg" alt="" width="480" height="360" />
+        <ul class="connexion-atouts">
+          <li><%- icon('shield', 18) %> Accès réservé à votre profil</li>
+          <li><%- icon('chart', 18) %> Suivi des soldes et des impayés</li>
+          <li><%- icon('card', 18) %> Exports XLS, CSV et PDF</li>
+        </ul>
+      </section>
 
-  <% if (lastAttemptWarning) { %>
-  <%# Bandeau exigé par l'Epic 6 (TS5) après 2 tentatives échouées %>
-  <p class="alerte-dernier-essai" role="alert">ATTENTION : C'est votre dernier essai...</p>
-  <% } %>
+      <section class="connexion-panneau">
+        <div class="connexion-carte">
+          <span class="marque marque-mobile">
+            <img src="/img/logo.svg" alt="" width="36" height="36" />
+            <span><strong>Portail Web</strong> Monétique</span>
+          </span>
+          <h2>Connexion</h2>
+          <p class="texte-secondaire">Administrateur, Product Owner ou Client : connectez-vous pour accéder à votre espace.</p>
 
-  <% if (error) { %>
-  <p class="erreur" role="alert"><%= error %></p>
-  <% } %>
+          <% if (lastAttemptWarning) { %>
+          <%# Bandeau exigé par l'Epic 6 (TS5) après 2 tentatives échouées %>
+          <p class="alerte alerte-danger alerte-dernier-essai" role="alert"><%- icon('alert', 20) %><span>ATTENTION : C'est votre dernier essai...</span></p>
+          <% } %>
 
-  <form method="post" action="/connexion">
-    <label for="login">Identifiant</label>
-    <input id="login" name="login" type="text" value="<%= login %>" autocomplete="username" required autofocus />
+          <% if (error) { %>
+          <p class="alerte alerte-erreur" role="alert"><%- icon('info', 20) %><span><%= error %></span></p>
+          <% } %>
 
-    <label for="password">Mot de passe</label>
-    <div class="champ-mot-de-passe">
-      <input id="password" name="password" type="password" autocomplete="current-password" required />
-      <%# Bouton « l'œil » (Epic 6, TS6) : affiche le mot de passe en clair %>
-      <button
-        type="button"
-        class="bouton-oeil"
-        data-cible="password"
-        aria-label="Afficher le mot de passe"
-        aria-pressed="false"
-      >
-        👁
-      </button>
-    </div>
+          <form method="post" action="/connexion" class="formulaire">
+            <label for="login">Identifiant</label>
+            <div class="champ-icone">
+              <%- icon('user', 18) %>
+              <input id="login" name="login" type="text" value="<%= login %>" autocomplete="username" required autofocus />
+            </div>
 
-    <button type="submit" class="bouton-principal">Se connecter</button>
-  </form>
-</section>
-<script src="/js/mot-de-passe.js"></script>
-<%- include('partials/footer') %>
+            <label for="password">Mot de passe</label>
+            <%- include('partials/champ-mot-de-passe', { autocomplete: 'current-password' }) %>
+
+            <button type="submit" class="bouton bouton-principal bouton-large">
+              Se connecter <%- icon('arrow-right', 18) %>
+            </button>
+          </form>
+
+          <p class="connexion-aide"><%- icon('lock', 16) %> Vos identifiants sont personnels : ne les communiquez à personne.</p>
+        </div>
+        <p class="connexion-pied">Portail Web Monétique · BUT2 — Qualité de développement</p>
+      </section>
+    </main>
+  </body>
+</html>

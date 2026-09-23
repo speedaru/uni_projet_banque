@@ -1,4 +1,8 @@
 <%- include('partials/header', { titre }) %>
-<h2><%= titre %></h2>
-<p class="a-venir">Cet écran sera développé lors d'une prochaine phase du projet.</p>
+<section class="carte etat-vide">
+  <img src="/img/illustration-a-venir.svg" alt="" width="260" height="180" />
+  <h1><%= titre %></h1>
+  <p class="a-venir">Cet écran sera développé lors d'une prochaine phase du projet.</p>
+  <a class="bouton bouton-secondaire" href="<%= navigation[0].href %>"><%- icon('home', 18) %> Retour à l'accueil</a>
+</section>
 <%- include('partials/footer') %>
