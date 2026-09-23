@@ -20,6 +20,12 @@
           </li>
           <% }) %>
         </ul>
+        <% if (locals.user) { %>
+        <form class="deconnexion" method="post" action="/deconnexion">
+          <span><%= user.login %></span>
+          <button type="submit">Déconnexion</button>
+        </form>
+        <% } %>
       </nav>
       <% } %>
     </header>

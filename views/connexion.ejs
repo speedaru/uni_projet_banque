@@ -1,0 +1,38 @@
+<%- include('partials/header', { titre }) %>
+<section class="connexion">
+  <h2>Connexion</h2>
+  <p>Administrateur, Product Owner ou Client : connectez-vous pour accéder à votre espace.</p>
+
+  <% if (lastAttemptWarning) { %>
+  <%# Bandeau exigé par l'Epic 6 (TS5) après 2 tentatives échouées %>
+  <p class="alerte-dernier-essai" role="alert">ATTENTION : C'est votre dernier essai...</p>
+  <% } %>
+
+  <% if (error) { %>
+  <p class="erreur" role="alert"><%= error %></p>
+  <% } %>
+
+  <form method="post" action="/connexion">
+    <label for="login">Identifiant</label>
+    <input id="login" name="login" type="text" value="<%= login %>" autocomplete="username" required autofocus />
+
+    <label for="password">Mot de passe</label>
+    <div class="champ-mot-de-passe">
+      <input id="password" name="password" type="password" autocomplete="current-password" required />
+      <%# Bouton « l'œil » (Epic 6, TS6) : affiche le mot de passe en clair %>
+      <button
+        type="button"
+        class="bouton-oeil"
+        data-cible="password"
+        aria-label="Afficher le mot de passe"
+        aria-pressed="false"
+      >
+        👁
+      </button>
+    </div>
+
+    <button type="submit" class="bouton-principal">Se connecter</button>
+  </form>
+</section>
+<script src="/js/connexion.js"></script>
+<%- include('partials/footer') %>

@@ -89,6 +89,109 @@ main {
   border-color: #0b3d91;
 }
 
+/* Bouton de déconnexion dans le menu */
+.deconnexion {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  font-size: 0.9rem;
+}
+
+.deconnexion button {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.deconnexion button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Écran de connexion (Epic 6) */
+.connexion {
+  max-width: 400px;
+  margin: 1rem auto;
+  padding: 2rem;
+  border: 1px solid #d8dde6;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.connexion h2 {
+  margin-top: 0;
+}
+
+.connexion form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.connexion label {
+  margin-top: 0.6rem;
+  font-weight: 600;
+}
+
+.connexion input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #b8c0cc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.champ-mot-de-passe {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.bouton-oeil {
+  padding: 0 0.75rem;
+  border: 1px solid #b8c0cc;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.bouton-oeil[aria-pressed='true'] {
+  background: #e6ecf7;
+  border-color: #0b3d91;
+}
+
+.bouton-principal {
+  margin-top: 1.25rem;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 4px;
+  background: #0b3d91;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bouton-principal:hover {
+  background: #082d6b;
+}
+
+.erreur {
+  color: #b00020;
+}
+
+/* Bandeau rouge « ATTENTION : C'est votre dernier essai... » (Epic 6, TS5) */
+.alerte-dernier-essai {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  background: #c62828;
+  color: #fff;
+  font-weight: 700;
+}
+
 .a-venir {
   color: #666;
   font-style: italic;

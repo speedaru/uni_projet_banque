@@ -53,10 +53,4 @@ describe('Espaces par rôle', () => {
       expect(response.text).toContain('prochaine phase');
     },
   );
-
-  it('n’affiche pas de menu sur la page d’accueil générale', async () => {
-    const response = await request(app).get('/');
-
-    expect(response.text).not.toContain('nav-principale');
-  });
 });

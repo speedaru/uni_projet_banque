@@ -2,6 +2,8 @@ import express from 'express';
 import session from 'express-session';
 import path from 'node:path';
 
+import './lib/session';
+import { authRouter } from './routes/auth';
 import { indexRouter } from './routes/index';
 import { createRoleRouter } from './routes/roles';
 
@@ -29,7 +31,14 @@ export function createApp() {
     }),
   );
 
+  // Utilisateur connecté accessible dans toutes les vues (bouton de déconnexion)
+  app.use((req, res, next) => {
+    res.locals.user = req.session.user;
+    next();
+  });
+
   app.use('/', indexRouter);
+  app.use(authRouter);
   app.use(createRoleRouter('admin'));
   app.use(createRoleRouter('po'));
   app.use(createRoleRouter('client'));
