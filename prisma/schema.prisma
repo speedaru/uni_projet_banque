@@ -15,3 +15,28 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// Profils utilisateurs (Epic 6/7)
+enum Role {
+  admin
+  po
+  client
+}
+
+// Entreprise cliente de la banque, identifiée par son SIREN
+model Entreprise {
+  siren         String        @id @db.Char(9)
+  raisonSociale String        @db.VarChar(20)
+  utilisateurs  Utilisateur[]
+}
+
+// Compte de connexion au portail. Un client est rattaché à son entreprise (filtrage par SIREN).
+model Utilisateur {
+  id           Int         @id @default(autoincrement())
+  login        String      @unique @db.VarChar(50)
+  passwordHash String
+  role         Role
+  siren        String?     @db.Char(9)
+  entreprise   Entreprise? @relation(fields: [siren], references: [siren])
+  createdAt    DateTime    @default(now())
+}

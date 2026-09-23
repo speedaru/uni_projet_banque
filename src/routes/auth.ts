@@ -1,10 +1,14 @@
 import { Router } from 'express';
 
 import { createLoginHandler, logout, showLoginPage } from '../controllers/authController';
-import { findDemoUser } from '../services/demoUsers';
+import type { UserRepository } from '../services/userRepository';
 
-export const authRouter = Router();
+export function createAuthRouter(users: UserRepository) {
+  const router = Router();
 
-authRouter.get('/connexion', showLoginPage);
-authRouter.post('/connexion', createLoginHandler(findDemoUser));
-authRouter.post('/deconnexion', logout);
+  router.get('/connexion', showLoginPage);
+  router.post('/connexion', createLoginHandler(users));
+  router.post('/deconnexion', logout);
+
+  return router;
+}

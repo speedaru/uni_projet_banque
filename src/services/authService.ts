@@ -1,33 +1,22 @@
 import bcrypt from 'bcrypt';
 
-import type { Role } from '../lib/navigation';
 import type { SessionUser } from '../lib/session';
-
-// Utilisateur tel qu'il est stocké (mot de passe hashé avec bcrypt)
-export interface UserRecord {
-  login: string;
-  passwordHash: string;
-  role: Role;
-  siren?: string;
-}
-
-export type FindUser = (login: string) => Promise<UserRecord | null>;
+import type { UserRepository } from './userRepository';
 
 // Nombre d'échecs à partir duquel on affiche « ATTENTION : C'est votre dernier essai... »
 export const WARNING_THRESHOLD = 2;
 
 // Vérifie le couple login / mot de passe. Renvoie l'utilisateur à mettre en session, ou null.
-// La recherche de l'utilisateur est passée en paramètre pour pouvoir brancher Prisma plus tard.
 export async function authenticate(
   login: string,
   password: string,
-  findUser: FindUser,
+  users: Pick<UserRepository, 'findByLogin'>,
 ): Promise<SessionUser | null> {
   if (!login || !password) {
     return null;
   }
 
-  const user = await findUser(login);
+  const user = await users.findByLogin(login);
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return null;
   }

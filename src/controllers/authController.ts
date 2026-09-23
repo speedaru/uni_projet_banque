@@ -2,7 +2,8 @@ import type { Request, Response } from 'express';
 
 import '../lib/session';
 import { navigation } from '../lib/navigation';
-import { authenticate, FindUser, shouldShowLastAttemptWarning } from '../services/authService';
+import { authenticate, shouldShowLastAttemptWarning } from '../services/authService';
+import type { UserRepository } from '../services/userRepository';
 
 function renderLoginPage(req: Request, res: Response, options: { error?: string; login?: string }) {
   res.render('connexion', {
@@ -21,12 +22,12 @@ export function showLoginPage(req: Request, res: Response) {
   renderLoginPage(req, res, {});
 }
 
-export function createLoginHandler(findUser: FindUser) {
+export function createLoginHandler(users: UserRepository) {
   return async (req: Request, res: Response) => {
     const login = String(req.body.login ?? '').trim();
     const password = String(req.body.password ?? '');
 
-    const user = await authenticate(login, password, findUser);
+    const user = await authenticate(login, password, users);
 
     if (!user) {
       req.session.failedAttempts = (req.session.failedAttempts ?? 0) + 1;

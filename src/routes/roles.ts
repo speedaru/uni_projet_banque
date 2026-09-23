@@ -1,13 +1,16 @@
 import { Router } from 'express';
 
 import { navigation, Role, roleLabels } from '../lib/navigation';
+import { requireRole } from '../middlewares/requireRole';
 
-// Crée le routeur d'un espace (admin, po ou client) : page d'accueil de l'espace
-// + une page « à venir » pour chaque écran du menu pas encore développé.
-// Le contrôle d'accès par profil (Epic 7) viendra se brancher ici sous forme de middleware.
-export function createRoleRouter(role: Role) {
+// Crée le routeur d'un espace (admin, po ou client) : contrôle d'accès, page d'accueil,
+// écrans déjà développés (`pages`), puis une page « à venir » pour les autres écrans du menu.
+export function createRoleRouter(role: Role, pages?: Router) {
   const router = Router();
-  const [home, ...pages] = navigation[role];
+  const [home, ...links] = navigation[role];
+
+  // Toutes les URL de l'espace sont réservées à son profil (Epic 7)
+  router.use(home.href, requireRole(role));
 
   // Variables communes à toutes les vues de l'espace, utilisées par le bandeau de navigation
   router.use(home.href, (req, res, next) => {
@@ -22,9 +25,14 @@ export function createRoleRouter(role: Role) {
     res.render(`${role}/accueil`, { titre: `Espace ${roleLabels[role]}` });
   });
 
-  for (const page of pages) {
-    router.get(page.href, (_req, res) => {
-      res.render('a-venir', { titre: page.label });
+  if (pages) {
+    router.use(pages);
+  }
+
+  // Écrans pas encore développés (ignorés si `pages` a déjà répondu)
+  for (const link of links) {
+    router.get(link.href, (_req, res) => {
+      res.render('a-venir', { titre: link.label });
     });
   }
 

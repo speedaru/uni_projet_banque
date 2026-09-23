@@ -1,21 +1,19 @@
 import bcrypt from 'bcrypt';
 import request from 'supertest';
 
-import { createApp } from '../src/app';
-import {
-  authenticate,
-  shouldShowLastAttemptWarning,
-  UserRecord,
-} from '../src/services/authService';
+import { authenticate, shouldShowLastAttemptWarning } from '../src/services/authService';
+import type { UserRecord } from '../src/services/userRepository';
+import { createTestApp } from './helpers/testApp';
 
 describe('authService', () => {
   const user: UserRecord = {
+    id: 1,
     login: 'client',
     passwordHash: bcrypt.hashSync('secret', 4),
     role: 'client',
     siren: '123456789',
   };
-  const findUser = async (login: string) => (login === user.login ? user : null);
+  const findUser = { findByLogin: async (login: string) => (login === user.login ? user : null) };
 
   it('renvoie l’utilisateur (sans le hash) si le mot de passe est correct', async () => {
     const result = await authenticate('client', 'secret', findUser);
@@ -43,7 +41,7 @@ describe('authService', () => {
 });
 
 describe('Écran de connexion', () => {
-  const app = createApp();
+  const { app } = createTestApp();
 
   it('affiche le formulaire avec le bouton « œil »', async () => {
     const response = await request(app).get('/connexion');

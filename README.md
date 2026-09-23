@@ -66,11 +66,22 @@ cp .env.example .env
 # 4. Générer le client Prisma et appliquer les migrations de base de données
 npx prisma migrate dev
 
-# 5. Lancer le serveur en mode développement (rechargement automatique)
+# 5. Créer les comptes de démonstration (un par profil)
+npm run prisma:seed
+
+# 6. Lancer le serveur en mode développement (rechargement automatique)
 npm run dev
 ```
 
-L'application est alors accessible sur `http://localhost:3000`.
+L'application est alors accessible sur `http://localhost:3000` (écran de connexion).
+
+Comptes de démonstration créés par `npm run prisma:seed` (développement local uniquement) :
+
+| Profil         | Identifiant | Mot de passe |
+| -------------- | ----------- | ------------ |
+| Administrateur | `admin`     | `admin123`   |
+| Product Owner  | `po`        | `po123`      |
+| Client         | `client`    | `client123`  |
 
 ### Scripts npm disponibles
 
@@ -84,6 +95,7 @@ L'application est alors accessible sur `http://localhost:3000`.
 | `npm run format`         | Formate tout le projet avec Prettier                           |
 | `npm test`               | Lance les tests automatisés (Jest)                             |
 | `npm run prisma:migrate` | Crée/applique une migration de base de données                 |
+| `npm run prisma:seed`    | Crée/remet à jour les comptes de démonstration                 |
 | `npm run prisma:studio`  | Ouvre Prisma Studio (interface visuelle de la base de données) |
 
 ## Structure du projet
@@ -92,16 +104,17 @@ L'application est alors accessible sur `http://localhost:3000`.
 docs/            → documentation du projet (périmètre, stack, spécifications fournies)
 src/
   routes/        → définitions de routes (par rôle : admin/po/client)
-  controllers/   → gestion des requêtes/réponses (à créer au fil des epics)
-  services/      → logique métier (à créer au fil des epics)
+  controllers/   → gestion des requêtes/réponses
+  services/      → logique métier et accès aux données (ex. UserRepository : Prisma en vrai, en mémoire dans les tests)
+  middlewares/   → middlewares Express (ex. contrôle d'accès par profil)
   lib/           → utilitaires partagés (ex. client Prisma, menus de navigation par rôle)
   generated/     → code généré par Prisma, jamais commité
   app.ts         → configuration de l'application Express
   server.ts      → point d'entrée (démarre le serveur)
 views/           → templates EJS (admin/, po/, client/ : pages de chaque espace ; partials/ : en-tête, menu, pied de page)
 public/          → fichiers statiques (CSS, JS client)
-prisma/          → schéma de base de données et migrations
-tests/           → tests automatisés (Jest + Supertest)
+prisma/          → schéma de base de données, migrations et seed (comptes de démonstration)
+tests/           → tests automatisés (Jest + Supertest) ; helpers/ : application de test sans base de données
 ```
 
 Détail complet de l'architecture dans [`docs/scope-and-stack.fr.md`](docs/scope-and-stack.fr.md#6-architecture-générale).
