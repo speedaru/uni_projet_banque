@@ -1,0 +1,79 @@
+<%- include('../partials/header', { titre }) %>
+<h2><%= titre %></h2>
+
+<% if (success) { %>
+<p class="succes" role="status"><%= success %></p>
+<% } %>
+<% if (errors.length > 0) { %>
+<ul class="erreurs" role="alert">
+  <% errors.forEach((error) => { %>
+  <li><%= error %></li>
+  <% }) %>
+</ul>
+<% } %>
+
+<section class="carte">
+  <h3>Créer un compte client</h3>
+  <form method="post" action="/admin/comptes" class="formulaire">
+    <label for="login">Identifiant</label>
+    <input id="login" name="login" value="<%= form.login ?? '' %>" required />
+
+    <label for="password">Mot de passe (<%= minPasswordLength %> caractères minimum)</label>
+    <div class="champ-mot-de-passe">
+      <input id="password" name="password" type="password" minlength="<%= minPasswordLength %>" autocomplete="new-password" required />
+      <button type="button" class="bouton-oeil" data-cible="password" aria-label="Afficher le mot de passe" aria-pressed="false">👁</button>
+    </div>
+
+    <label for="siren">SIREN de l'entreprise</label>
+    <input id="siren" name="siren" value="<%= form.siren ?? '' %>" pattern="\d{9}" maxlength="9" inputmode="numeric" required />
+
+    <label for="raisonSociale">Raison sociale</label>
+    <input id="raisonSociale" name="raisonSociale" value="<%= form.raisonSociale ?? '' %>" maxlength="20" required />
+
+    <%# Case « Accord Product Owner » exigée par les spécifications (fonction 1) %>
+    <label class="case-accord">
+      <input type="checkbox" name="poAgreement" required />
+      Accord du Product Owner
+    </label>
+
+    <button type="submit" class="bouton-principal">Créer le compte</button>
+  </form>
+</section>
+
+<section class="carte">
+  <h3>Comptes existants (<%= clients.length %>)</h3>
+  <% if (clients.length === 0) { %>
+  <p>Aucun compte client pour le moment.</p>
+  <% } else { %>
+  <table class="tableau">
+    <thead>
+      <tr>
+        <th>Identifiant</th>
+        <th>SIREN</th>
+        <th>Raison sociale</th>
+        <th>Suppression</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% clients.forEach((client) => { %>
+      <tr>
+        <td><%= client.login %></td>
+        <td><%= client.siren %></td>
+        <td><%= client.raisonSociale %></td>
+        <td>
+          <form method="post" action="/admin/comptes/<%= client.id %>/supprimer" class="form-suppression">
+            <label class="case-accord">
+              <input type="checkbox" name="poAgreement" required />
+              Accord PO
+            </label>
+            <button type="submit" class="bouton-danger">Supprimer</button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</section>
+<script src="/js/mot-de-passe.js"></script>
+<%- include('../partials/footer') %>

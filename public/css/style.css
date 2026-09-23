@@ -15,8 +15,340 @@ header {
   padding: 1rem 2rem;
 }
 
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Menu principal de chaque espace (admin/po/client) */
+.nav-principale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  margin-top: 0.75rem;
+}
+
+.nav-role {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.nav-principale ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-principale a {
+  display: block;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-principale a:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.nav-principale a[aria-current='page'] {
+  background: #fff;
+  color: #0b3d91;
+  font-weight: 600;
+}
+
 main {
   padding: 2rem;
+}
+
+/* Cartes de raccourcis sur les pages d'accueil */
+.raccourcis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.raccourcis a {
+  display: block;
+  padding: 1.25rem;
+  border: 1px solid #d8dde6;
+  border-radius: 6px;
+  background: #fff;
+  color: #0b3d91;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.raccourcis a:hover {
+  border-color: #0b3d91;
+}
+
+/* Bouton de déconnexion dans le menu */
+.deconnexion {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  font-size: 0.9rem;
+}
+
+.deconnexion button {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.deconnexion button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Écran de connexion (Epic 6) */
+.connexion {
+  max-width: 400px;
+  margin: 1rem auto;
+  padding: 2rem;
+  border: 1px solid #d8dde6;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.connexion h2 {
+  margin-top: 0;
+}
+
+.connexion form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.connexion label {
+  margin-top: 0.6rem;
+  font-weight: 600;
+}
+
+.connexion input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #b8c0cc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.champ-mot-de-passe {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.bouton-oeil {
+  padding: 0 0.75rem;
+  border: 1px solid #b8c0cc;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.bouton-oeil[aria-pressed='true'] {
+  background: #e6ecf7;
+  border-color: #0b3d91;
+}
+
+.bouton-principal {
+  margin-top: 1.25rem;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 4px;
+  background: #0b3d91;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bouton-principal:hover {
+  background: #082d6b;
+}
+
+.erreur {
+  color: #b00020;
+}
+
+/* Bandeau rouge « ATTENTION : C'est votre dernier essai... » (Epic 6, TS5) */
+.alerte-dernier-essai {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  background: #c62828;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Blocs et formulaires génériques */
+.carte {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #d8dde6;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.carte h3 {
+  margin-top: 0;
+}
+
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 420px;
+}
+
+.formulaire label {
+  margin-top: 0.6rem;
+  font-weight: 600;
+}
+
+.formulaire input:not([type='checkbox']) {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #b8c0cc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.case-accord {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+.succes {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  background: #e3f4e6;
+  color: #1b5e20;
+}
+
+.erreurs {
+  padding: 0.75rem 1rem 0.75rem 2rem;
+  border-radius: 4px;
+  background: #fdecea;
+  color: #b00020;
+}
+
+/* Tableaux de données */
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableau th,
+.tableau td {
+  padding: 0.6rem;
+  border-bottom: 1px solid #e3e7ee;
+  text-align: left;
+}
+
+.tableau th {
+  background: #f0f3f8;
+}
+
+.tableau th a {
+  color: inherit;
+}
+
+.tableau tfoot th {
+  border-top: 2px solid #b8c0cc;
+}
+
+.tableau .nombre {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Montant négatif en rouge (Epic 1 US6, Epic 2 US6) */
+.tableau .negatif {
+  color: #c62828;
+  font-weight: 700;
+}
+
+.nombre-resultats {
+  color: #555;
+  font-weight: 600;
+}
+
+/* Formulaire de critères de recherche */
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.filtres .champ {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.filtres label {
+  font-weight: 600;
+}
+
+.filtres input {
+  padding: 0.5rem;
+  border: 1px solid #b8c0cc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.filtres input[readonly] {
+  background: #f0f3f8;
+}
+
+.filtres .actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filtres .bouton-principal {
+  margin-top: 0;
+  padding: 0.55rem 1.25rem;
+}
+
+.form-suppression {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.form-suppression .case-accord {
+  font-weight: normal;
+}
+
+.bouton-danger {
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  background: #c62828;
+  color: #fff;
+  cursor: pointer;
+}
+
+.a-venir {
+  color: #666;
+  font-style: italic;
 }
 
 footer {

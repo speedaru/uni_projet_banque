@@ -14,7 +14,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          # Node 24 (npm 11) : même version que celle qui génère package-lock.json en local.
+          # Avec Node 22 (npm 10), `npm ci` refuse le lock (@emnapi/core manquant).
+          node-version: 24
           cache: npm
 
       - run: npm ci
