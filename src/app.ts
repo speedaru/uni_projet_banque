@@ -10,6 +10,7 @@ import { createAuthRouter } from './routes/auth';
 import { createBusinessPagesRouter } from './routes/business';
 import { indexRouter } from './routes/index';
 import { createRoleRouter } from './routes/roles';
+import { PdfRenderer, puppeteerPdfRenderer } from './services/export/pdfExport';
 import { prismaRemiseRepository } from './services/prismaRemiseRepository';
 import { prismaTreasuryRepository } from './services/prismaTreasuryRepository';
 import { prismaUserRepository } from './services/prismaUserRepository';
@@ -23,12 +24,15 @@ export interface AppDependencies {
   users?: UserRepository;
   treasury?: TreasuryRepository;
   remises?: RemiseRepository;
+  // Génération des PDF (Puppeteer en vrai, version factice dans les tests)
+  renderPdf?: PdfRenderer;
 }
 
 export function createApp({
   users = prismaUserRepository,
   treasury = prismaTreasuryRepository,
   remises = prismaRemiseRepository,
+  renderPdf = puppeteerPdfRenderer,
 }: AppDependencies = {}) {
   const app = express();
 
@@ -67,8 +71,9 @@ export function createApp({
   app.use('/', indexRouter);
   app.use(createAuthRouter(users));
   app.use(createRoleRouter('admin', createAdminPagesRouter(users)));
-  app.use(createRoleRouter('po', createBusinessPagesRouter('/po', { treasury, remises })));
-  app.use(createRoleRouter('client', createBusinessPagesRouter('/client', { treasury, remises })));
+  const business = { treasury, remises, renderPdf };
+  app.use(createRoleRouter('po', createBusinessPagesRouter('/po', business)));
+  app.use(createRoleRouter('client', createBusinessPagesRouter('/client', business)));
 
   return app;
 }

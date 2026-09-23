@@ -88,6 +88,12 @@
     <p>Aucune remise pour ces critères.</p>
   </div>
   <% } else { %>
+  <%- include('partials/export', {
+    action: `${navigation[0].href}/remises/export`,
+    params: exportParams,
+    id: 'export-remises',
+    libelle: `Exporter les ${result.total} remise${result.total > 1 ? 's' : ''}`,
+  }) %>
   <p class="aide-tableau"><%- icon('info', 16) %> Cliquez sur une remise pour afficher le détail de ses transactions.</p>
   <div class="tableau-conteneur">
     <table class="tableau tableau-remises">
@@ -126,7 +132,15 @@
         <tr class="ligne-detail" id="detail-<%= index %>" hidden>
           <td colspan="9">
             <div class="detail">
-              <h3 class="detail-titre"><%- icon('card', 18) %> Transactions de la remise <%= row.numero %></h3>
+              <div class="detail-entete">
+                <h3 class="detail-titre"><%- icon('card', 18) %> Transactions de la remise <%= row.numero %></h3>
+                <%- include('partials/export', {
+                  action: `${navigation[0].href}/remises/${row.numero}/export`,
+                  params: {},
+                  id: `export-detail-${index}`,
+                  libelle: 'Exporter le détail',
+                }) %>
+              </div>
               <table class="tableau tableau-detail">
                 <thead>
                   <tr>

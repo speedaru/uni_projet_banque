@@ -1,0 +1,17 @@
+<%# Formulaire d'export (Epic 5) : choix du format par boutons radio (XLS, CSV, PDF)
+    Paramètres : action (URL de l'export), params (critères à recopier), id (préfixe unique), libelle %>
+<form method="get" action="<%= action %>" class="export">
+  <% Object.entries(params).forEach(([name, value]) => { %>
+  <input type="hidden" name="<%= name %>" value="<%= value %>" />
+  <% }) %>
+  <fieldset class="export-formats">
+    <legend><%- icon('download', 16) %> <%= locals.libelle || 'Exporter' %></legend>
+    <% [['xls', 'XLS'], ['csv', 'CSV'], ['pdf', 'PDF']].forEach(([value, label], index) => { %>
+    <label class="export-format" for="<%= id %>-<%= value %>">
+      <input type="radio" id="<%= id %>-<%= value %>" name="format" value="<%= value %>" <%= index === 0 ? 'checked' : '' %> />
+      <span><%= label %></span>
+    </label>
+    <% }) %>
+  </fieldset>
+  <button type="submit" class="bouton bouton-secondaire bouton-petit"><%- icon('download', 16) %> Télécharger</button>
+</form>

@@ -3,7 +3,8 @@ import request from 'supertest';
 
 import { createApp } from '../../src/app';
 import type { Role } from '../../src/lib/navigation';
-import type { RemiseRepository } from '../../src/services/remiseRepository';
+import type { PdfRenderer } from '../../src/services/export/pdfExport';
+import type { RemiseRepository, RemiseRow } from '../../src/services/remiseRepository';
 import type { TreasuryRepository, TreasuryRow } from '../../src/services/treasuryRepository';
 import type { UserRecord, UserRepository } from '../../src/services/userRepository';
 
@@ -100,29 +101,41 @@ export function createMemoryRemiseRepository(): RemiseRepository {
         )
         .sort((a, b) => b.date.localeCompare(a.date) || b.numero.localeCompare(a.numero));
 
-      const rows = matching.slice((page - 1) * pageSize, page * pageSize).map((remise) => ({
-        numero: remise.numero,
-        siren: remise.siren,
-        raisonSociale: remise.raisonSociale,
-        dateTraitement: remise.date,
-        devise: 'EUR',
-        transactionCount: remise.amounts.length,
-        totalAmount: remise.amounts.reduce((total, amount) => total + amount, 0),
-        transactions: remise.amounts.map((montant, index) => ({
-          siren: remise.siren,
-          dateVente: remise.date,
-          numeroCarte: `49701*******000${index}`,
-          reseau: 'CB',
-          numeroAutorisation: `${remise.numero.slice(-3)}00${index}`,
-          devise: 'EUR',
-          montant,
-        })),
-      }));
-
+      const rows = matching.slice((page - 1) * pageSize, page * pageSize).map(toRemiseRow);
       return { total: matching.length, rows };
+    },
+    async findByNumero(numero) {
+      const remise = testRemises.find((candidate) => candidate.numero === numero);
+      return remise ? toRemiseRow(remise) : null;
     },
   };
 }
+
+function toRemiseRow(remise: (typeof testRemises)[number]): RemiseRow {
+  return {
+    numero: remise.numero,
+    siren: remise.siren,
+    raisonSociale: remise.raisonSociale,
+    dateTraitement: remise.date,
+    devise: 'EUR',
+    transactionCount: remise.amounts.length,
+    totalAmount: remise.amounts.reduce((total, amount) => total + amount, 0),
+    transactions: remise.amounts.map((montant, index) => ({
+      siren: remise.siren,
+      dateVente: remise.date,
+      numeroCarte: `49701*******000${index}`,
+      reseau: 'CB',
+      numeroAutorisation: `${remise.numero.slice(-3)}00${index}`,
+      devise: 'EUR',
+      montant,
+    })),
+  };
+}
+
+// Générateur de PDF factice : renvoie le HTML du rapport préfixé d'un en-tête PDF,
+// ce qui permet de vérifier le contenu sans lancer de navigateur
+export const fakePdfRenderer: PdfRenderer = async (html, { landscape }) =>
+  Buffer.from(`%PDF-FAKE landscape=${landscape}\n${html}`);
 
 // Version en mémoire du TreasuryRepository, même logique de cumul que la requête SQL
 export function createMemoryTreasuryRepository(): TreasuryRepository {
@@ -158,7 +171,7 @@ export function createTestApp() {
   const users = createMemoryUserRepository();
   const treasury = createMemoryTreasuryRepository();
   const remises = createMemoryRemiseRepository();
-  return { app: createApp({ users, treasury, remises }), users };
+  return { app: createApp({ users, treasury, remises, renderPdf: fakePdfRenderer }), users };
 }
 
 const passwords: Record<Role, string> = { admin: 'admin123', po: 'po123', client: 'client123' };

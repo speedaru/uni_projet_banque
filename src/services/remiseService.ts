@@ -5,6 +5,8 @@ import { withoutEmpty } from './treasuryService';
 // Choix proposés pour le nombre de lignes par page (Epic 2, US1)
 export const PAGE_SIZES = [10, 25, 50];
 const DEFAULT_PAGE_SIZE = 10;
+// Nombre maximal de remises dans un export (toutes pages confondues)
+export const EXPORT_MAX_ROWS = 5000;
 
 // Lit et vérifie les critères de recherche des remises. Renvoie les filtres et les erreurs.
 export function parseRemiseFilters(query: Query): { filters: RemiseFilters; errors: string[] } {

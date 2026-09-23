@@ -51,4 +51,6 @@ export interface RemiseSearchResult {
 // version en mémoire dans les tests.
 export interface RemiseRepository {
   search(filters: RemiseFilters, pagination: Pagination): Promise<RemiseSearchResult>;
+  // Une remise précise avec ses transactions (export du détail)
+  findByNumero(numero: string): Promise<RemiseRow | null>;
 }
