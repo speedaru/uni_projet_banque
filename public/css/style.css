@@ -263,6 +263,70 @@ main {
   background: #f0f3f8;
 }
 
+.tableau th a {
+  color: inherit;
+}
+
+.tableau tfoot th {
+  border-top: 2px solid #b8c0cc;
+}
+
+.tableau .nombre {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Montant négatif en rouge (Epic 1 US6, Epic 2 US6) */
+.tableau .negatif {
+  color: #c62828;
+  font-weight: 700;
+}
+
+.nombre-resultats {
+  color: #555;
+  font-weight: 600;
+}
+
+/* Formulaire de critères de recherche */
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.filtres .champ {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.filtres label {
+  font-weight: 600;
+}
+
+.filtres input {
+  padding: 0.5rem;
+  border: 1px solid #b8c0cc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.filtres input[readonly] {
+  background: #f0f3f8;
+}
+
+.filtres .actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filtres .bouton-principal {
+  margin-top: 0;
+  padding: 0.55rem 1.25rem;
+}
+
 .form-suppression {
   display: flex;
   align-items: center;

@@ -3,6 +3,7 @@ import request from 'supertest';
 
 import { createApp } from '../../src/app';
 import type { Role } from '../../src/lib/navigation';
+import type { TreasuryRepository, TreasuryRow } from '../../src/services/treasuryRepository';
 import type { UserRecord, UserRepository } from '../../src/services/userRepository';
 
 // Version en mémoire du UserRepository : les tests tournent sans PostgreSQL (CI comprise)
@@ -50,9 +51,48 @@ export function createMemoryUserRepository(): UserRepository & { companies: Map<
   };
 }
 
+// Remises de test : SIREN, raison sociale, date de valeur, montants des transactions
+export const testRemises = [
+  { siren: '123456789', raisonSociale: 'Boutique Démo', date: '2026-06-02', amounts: [100, 50.5] },
+  { siren: '123456789', raisonSociale: 'Boutique Démo', date: '2026-06-03', amounts: [20] },
+  { siren: '552100554', raisonSociale: 'Garage Leroy', date: '2026-06-02', amounts: [30, -250] },
+  { siren: '456278556', raisonSociale: 'Dupont SARL', date: '2026-06-03', amounts: [900, 45] },
+];
+
+// Version en mémoire du TreasuryRepository, même logique de cumul que la requête SQL
+export function createMemoryTreasuryRepository(): TreasuryRepository {
+  return {
+    async findAnnouncements({ siren, raisonSociale, dateValeur }) {
+      const rows = new Map<string, TreasuryRow>();
+      for (const remise of testRemises) {
+        if (
+          (siren && remise.siren !== siren) ||
+          (raisonSociale &&
+            !remise.raisonSociale.toLowerCase().includes(raisonSociale.toLowerCase())) ||
+          (dateValeur && remise.date !== dateValeur)
+        ) {
+          continue;
+        }
+        const row = rows.get(remise.siren) ?? {
+          siren: remise.siren,
+          raisonSociale: remise.raisonSociale,
+          transactionCount: 0,
+          devise: 'EUR',
+          totalAmount: 0,
+        };
+        row.transactionCount += remise.amounts.length;
+        row.totalAmount += remise.amounts.reduce((total, amount) => total + amount, 0);
+        rows.set(remise.siren, row);
+      }
+      return [...rows.values()];
+    },
+  };
+}
+
 export function createTestApp() {
   const users = createMemoryUserRepository();
-  return { app: createApp({ users }), users };
+  const treasury = createMemoryTreasuryRepository();
+  return { app: createApp({ users, treasury }), users };
 }
 
 const passwords: Record<Role, string> = { admin: 'admin123', po: 'po123', client: 'client123' };

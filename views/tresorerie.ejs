@@ -1,0 +1,94 @@
+<%- include('partials/header', { titre }) %>
+<h2><%= titre %></h2>
+
+<%# Critères de sélection (spécifications, fonction 2.1) %>
+<form method="get" class="carte filtres">
+  <div class="champ">
+    <label for="siren">N° de SIREN</label>
+    <% if (isClient) { %>
+    <input id="siren" value="<%= clientSiren %>" readonly />
+    <% } else { %>
+    <input id="siren" name="siren" value="<%= filters.siren ?? '' %>" placeholder="Tous" inputmode="numeric" maxlength="11" />
+    <% } %>
+  </div>
+  <div class="champ">
+    <label for="raisonSociale">Raison sociale</label>
+    <% if (isClient) { %>
+    <input id="raisonSociale" value="<%= clientRaisonSociale %>" readonly />
+    <% } else { %>
+    <input id="raisonSociale" name="raisonSociale" value="<%= filters.raisonSociale ?? '' %>" placeholder="Toutes" maxlength="20" />
+    <% } %>
+  </div>
+  <div class="champ">
+    <label for="dateValeur">Date de valeur</label>
+    <input id="dateValeur" name="dateValeur" type="date" value="<%= filters.dateValeur ?? '' %>" />
+  </div>
+  <input type="hidden" name="tri" value="<%= sort.key %>" />
+  <input type="hidden" name="ordre" value="<%= sort.order %>" />
+  <div class="actions">
+    <button type="submit" class="bouton-principal">Rechercher</button>
+    <a href="?">Réinitialiser</a>
+  </div>
+</form>
+
+<% if (errors.length > 0) { %>
+<ul class="erreurs" role="alert">
+  <% errors.forEach((error) => { %>
+  <li><%= error %></li>
+  <% }) %>
+</ul>
+<% } else { %>
+<section class="carte">
+  <h3>
+    <% if (filters.dateValeur) { %>
+    Annonces du <%= formatIsoDate(filters.dateValeur) %>
+    <% } else { %>
+    Solde global (toutes dates de valeur)
+    <% } %>
+  </h3>
+  <p class="nombre-resultats"><%= rows.length %> compte<%= rows.length > 1 ? 's' : '' %></p>
+
+  <% if (rows.length === 0) { %>
+  <p>Aucune annonce pour ces critères.</p>
+  <% } else { %>
+  <%
+    // Flèche indiquant la colonne triée
+    const arrow = (key) => (sort.key === key ? (sort.order === 'asc' ? ' ▲' : ' ▼') : '');
+  %>
+  <table class="tableau">
+    <thead>
+      <tr>
+        <th><a href="<%= sortUrl('siren') %>">N° de SIREN<%= arrow('siren') %></a></th>
+        <th>Raison sociale</th>
+        <th class="nombre">Nombre transactions</th>
+        <th>Devise</th>
+        <th class="nombre"><a href="<%= sortUrl('montant') %>">Montant total<%= arrow('montant') %></a></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% rows.forEach((row) => { %>
+      <tr>
+        <td><%= row.siren %></td>
+        <td><%= row.raisonSociale %></td>
+        <td class="nombre"><%= row.transactionCount %></td>
+        <td><%= row.devise %></td>
+        <%# Solde négatif affiché en rouge (Epic 1, US6) %>
+        <td class="nombre<%= row.totalAmount < 0 ? ' negatif' : '' %>"><%= formatAmount(row.totalAmount) %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+    <% if (rows.length > 1) { %>
+    <tfoot>
+      <tr>
+        <th colspan="2">Total</th>
+        <th class="nombre"><%= totals.transactionCount %></th>
+        <th>EUR</th>
+        <th class="nombre<%= totals.totalAmount < 0 ? ' negatif' : '' %>"><%= formatAmount(totals.totalAmount) %></th>
+      </tr>
+    </tfoot>
+    <% } %>
+  </table>
+  <% } %>
+</section>
+<% } %>
+<%- include('partials/footer') %>

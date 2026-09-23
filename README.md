@@ -66,7 +66,7 @@ cp .env.example .env
 # 4. Générer le client Prisma et appliquer les migrations de base de données
 npx prisma migrate dev
 
-# 5. Créer les comptes de démonstration (un par profil)
+# 5. Créer les comptes et les données de démonstration (entreprises, remises, transactions, impayés)
 npm run prisma:seed
 
 # 6. Lancer le serveur en mode développement (rechargement automatique)
@@ -95,7 +95,7 @@ Comptes de démonstration créés par `npm run prisma:seed` (développement loca
 | `npm run format`         | Formate tout le projet avec Prettier                           |
 | `npm test`               | Lance les tests automatisés (Jest)                             |
 | `npm run prisma:migrate` | Crée/applique une migration de base de données                 |
-| `npm run prisma:seed`    | Crée/remet à jour les comptes de démonstration                 |
+| `npm run prisma:seed`    | Recrée les comptes et données de démonstration                 |
 | `npm run prisma:studio`  | Ouvre Prisma Studio (interface visuelle de la base de données) |
 
 ## Structure du projet
@@ -113,7 +113,7 @@ src/
   server.ts      → point d'entrée (démarre le serveur)
 views/           → templates EJS (admin/, po/, client/ : pages de chaque espace ; partials/ : en-tête, menu, pied de page)
 public/          → fichiers statiques (CSS, JS client)
-prisma/          → schéma de base de données, migrations et seed (comptes de démonstration)
+prisma/          → schéma de base de données, migrations et seed (comptes et données de démonstration)
 tests/           → tests automatisés (Jest + Supertest) ; helpers/ : application de test sans base de données
 ```
 

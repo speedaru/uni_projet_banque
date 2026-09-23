@@ -28,6 +28,7 @@ model Entreprise {
   siren         String        @id @db.Char(9)
   raisonSociale String        @db.VarChar(20)
   utilisateurs  Utilisateur[]
+  remises       Remise[]
 }
 
 // Compte de connexion au portail. Un client est rattaché à son entreprise (filtrage par SIREN).
@@ -39,4 +40,52 @@ model Utilisateur {
   siren        String?     @db.Char(9)
   entreprise   Entreprise? @relation(fields: [siren], references: [siren])
   createdAt    DateTime    @default(now())
+}
+
+// Remise : lot de transactions carte déposé par une entreprise, traité à une date donnée.
+// La date de traitement sert de date de valeur pour les annonces de trésorerie.
+// Le nombre de transactions, le montant total et le sens (+/-) sont calculés à partir des transactions.
+model Remise {
+  id             Int           @id @default(autoincrement())
+  numero         String        @unique @db.VarChar(10)
+  siren          String        @db.Char(9)
+  entreprise     Entreprise    @relation(fields: [siren], references: [siren])
+  dateTraitement DateTime      @db.Date
+  devise         String        @default("EUR") @db.Char(3)
+  transactions   Transaction[]
+
+  @@index([siren, dateTraitement])
+}
+
+// Paiement par carte. Le montant est signé : négatif pour un impayé (sens « - »).
+model Transaction {
+  id                 Int      @id @default(autoincrement())
+  remiseId           Int
+  remise             Remise   @relation(fields: [remiseId], references: [id], onDelete: Cascade)
+  dateVente          DateTime
+  // Numéro masqué, ex. 12345*******5896
+  numeroCarte        String   @db.Char(16)
+  // CB, VS (Visa), MC (Mastercard), AE (American Express)...
+  reseau             String   @db.Char(2)
+  numeroAutorisation String   @unique @db.Char(6)
+  devise             String   @default("EUR") @db.Char(3)
+  montant            Decimal  @db.Decimal(7, 2)
+  impaye             Impaye?
+}
+
+// Impayé : transaction refusée faute de provision, suivie par un n° de dossier
+model Impaye {
+  id            Int         @id @default(autoincrement())
+  transactionId Int         @unique
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  numeroDossier String      @unique @db.Char(5)
+  motifCode     String      @db.Char(2)
+  motif         MotifImpaye @relation(fields: [motifCode], references: [code])
+}
+
+// Table de référence des 8 motifs d'impayé (voir le backlog produit)
+model MotifImpaye {
+  code    String   @id @db.Char(2)
+  libelle String   @db.VarChar(60)
+  impayes Impaye[]
 }
