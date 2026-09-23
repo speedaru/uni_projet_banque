@@ -12,10 +12,12 @@ import { indexRouter } from './routes/index';
 import { createRoleRouter } from './routes/roles';
 import { PdfRenderer, puppeteerPdfRenderer } from './services/export/pdfExport';
 import { prismaRemiseRepository } from './services/prismaRemiseRepository';
+import { prismaStatsRepository } from './services/prismaStatsRepository';
 import { prismaTreasuryRepository } from './services/prismaTreasuryRepository';
 import { prismaUnpaidRepository } from './services/prismaUnpaidRepository';
 import { prismaUserRepository } from './services/prismaUserRepository';
 import type { RemiseRepository } from './services/remiseRepository';
+import type { StatsRepository } from './services/statsRepository';
 import type { TreasuryRepository } from './services/treasuryRepository';
 import type { UnpaidRepository } from './services/unpaidRepository';
 import type { UserRepository } from './services/userRepository';
@@ -27,6 +29,7 @@ export interface AppDependencies {
   treasury?: TreasuryRepository;
   remises?: RemiseRepository;
   unpaid?: UnpaidRepository;
+  stats?: StatsRepository;
   // Génération des PDF (Puppeteer en vrai, version factice dans les tests)
   renderPdf?: PdfRenderer;
 }
@@ -36,6 +39,7 @@ export function createApp({
   treasury = prismaTreasuryRepository,
   remises = prismaRemiseRepository,
   unpaid = prismaUnpaidRepository,
+  stats = prismaStatsRepository,
   renderPdf = puppeteerPdfRenderer,
 }: AppDependencies = {}) {
   const app = express();
@@ -75,7 +79,7 @@ export function createApp({
   app.use('/', indexRouter);
   app.use(createAuthRouter(users));
   app.use(createRoleRouter('admin', createAdminPagesRouter(users)));
-  const business = { treasury, remises, unpaid, renderPdf };
+  const business = { treasury, remises, unpaid, stats, renderPdf };
   app.use(createRoleRouter('po', createBusinessPagesRouter('/po', business)));
   app.use(createRoleRouter('client', createBusinessPagesRouter('/client', business)));
 

@@ -1413,6 +1413,78 @@ img {
   background: linear-gradient(90deg, var(--orange), var(--danger));
 }
 
+/* Statistiques (Epic 4) */
+.choix-groupe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.choix-groupe legend {
+  width: 100%;
+  margin-bottom: 0.35rem;
+  color: var(--texte-secondaire);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.barre-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.periode-affichee {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--texte-secondaire);
+}
+
+.actions-impression {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.indicateurs-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.zone-graphique {
+  position: relative;
+  height: 340px;
+  margin-top: 1rem;
+}
+
+.grille-motifs {
+  display: grid;
+  grid-template-columns: minmax(260px, 420px) 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.grille-motifs > * {
+  min-width: 0;
+}
+
+.zone-camembert {
+  height: 360px;
+}
+
+/* Libellés longs des motifs : retour à la ligne autorisé */
+#tableau-motifs .libelle {
+  min-width: 180px;
+  white-space: normal;
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -1526,6 +1598,48 @@ img {
 
   .filtres .actions .bouton {
     flex: 1;
+  }
+}
+
+@media (max-width: 1100px) {
+  .indicateurs-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grille-motifs {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .indicateurs-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Impression (graphiques statistiques, Epic 4 US4) : uniquement le contenu utile */
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .entete,
+  .pied,
+  .filtres,
+  .actions-impression,
+  .export {
+    display: none !important;
+  }
+
+  .contenu {
+    max-width: none;
+    padding: 0;
+  }
+
+  .carte,
+  .indicateur {
+    box-shadow: none;
+    break-inside: avoid;
   }
 }
 

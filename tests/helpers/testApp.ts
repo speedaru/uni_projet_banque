@@ -5,6 +5,12 @@ import { createApp } from '../../src/app';
 import type { Role } from '../../src/lib/navigation';
 import type { PdfRenderer } from '../../src/services/export/pdfExport';
 import type { RemiseRepository, RemiseRow } from '../../src/services/remiseRepository';
+import type {
+  MotifSlice,
+  StatsFilters,
+  StatsPoint,
+  StatsRepository,
+} from '../../src/services/statsRepository';
 import type { TreasuryRepository, TreasuryRow } from '../../src/services/treasuryRepository';
 import type {
   UnpaidFilters,
@@ -238,6 +244,65 @@ export function createMemoryUnpaidRepository(): UnpaidRepository {
   };
 }
 
+// Version en mémoire du StatsRepository : impayés = testUnpaid, chiffre d'affaires = montants
+// positifs de testRemises, regroupés par mois ou par jour de la date de remise
+export function createMemoryStatsRepository(): StatsRepository {
+  const inScope = (
+    { siren, raisonSociale, dateDebut, dateFin }: StatsFilters,
+    row: { siren: string; raisonSociale: string; date: string },
+  ) =>
+    (!siren || row.siren === siren) &&
+    (!raisonSociale || row.raisonSociale.toLowerCase().includes(raisonSociale.toLowerCase())) &&
+    row.date >= dateDebut &&
+    row.date <= dateFin;
+
+  return {
+    async evolution(filters) {
+      const periodOf = (date: string) =>
+        filters.granularity === 'month' ? date.slice(0, 7) : date;
+      const points = new Map<string, StatsPoint>();
+      const point = (period: string) => {
+        if (!points.has(period)) {
+          points.set(period, { period, unpaidAmount: 0, unpaidCount: 0, revenue: 0 });
+        }
+        return points.get(period)!;
+      };
+      for (const row of testUnpaid) {
+        if (inScope(filters, { ...row, date: row.dateRemise })) {
+          const p = point(periodOf(row.dateRemise));
+          p.unpaidAmount += -row.montant;
+          p.unpaidCount += 1;
+        }
+      }
+      for (const remise of testRemises) {
+        if (inScope(filters, remise)) {
+          point(periodOf(remise.date)).revenue += remise.amounts
+            .filter((amount) => amount > 0)
+            .reduce((total, amount) => total + amount, 0);
+        }
+      }
+      return [...points.values()].sort((a, b) => a.period.localeCompare(b.period));
+    },
+    async byMotif(filters) {
+      const slices = new Map<string, MotifSlice>();
+      for (const row of testUnpaid) {
+        if (inScope(filters, { ...row, date: row.dateRemise })) {
+          const slice = slices.get(row.motifCode) ?? {
+            code: row.motifCode,
+            libelle: row.libelle,
+            count: 0,
+            amount: 0,
+          };
+          slice.count += 1;
+          slice.amount += -row.montant;
+          slices.set(row.motifCode, slice);
+        }
+      }
+      return [...slices.values()].sort((a, b) => b.amount - a.amount);
+    },
+  };
+}
+
 // Générateur de PDF factice : renvoie le HTML du rapport préfixé d'un en-tête PDF,
 // ce qui permet de vérifier le contenu sans lancer de navigateur
 export const fakePdfRenderer: PdfRenderer = async (html, { landscape }) =>
@@ -278,8 +343,9 @@ export function createTestApp() {
   const treasury = createMemoryTreasuryRepository();
   const remises = createMemoryRemiseRepository();
   const unpaid = createMemoryUnpaidRepository();
+  const stats = createMemoryStatsRepository();
   return {
-    app: createApp({ users, treasury, remises, unpaid, renderPdf: fakePdfRenderer }),
+    app: createApp({ users, treasury, remises, unpaid, stats, renderPdf: fakePdfRenderer }),
     users,
   };
 }

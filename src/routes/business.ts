@@ -1,10 +1,12 @@
 import { Router } from 'express';
 
 import { createRemiseController } from '../controllers/remiseController';
+import { createStatsController } from '../controllers/statsController';
 import { createTreasuryController } from '../controllers/treasuryController';
 import { createUnpaidController } from '../controllers/unpaidController';
 import type { PdfRenderer } from '../services/export/pdfExport';
 import type { RemiseRepository } from '../services/remiseRepository';
+import type { StatsRepository } from '../services/statsRepository';
 import type { TreasuryRepository } from '../services/treasuryRepository';
 import type { UnpaidRepository } from '../services/unpaidRepository';
 
@@ -12,6 +14,7 @@ export interface BusinessDependencies {
   treasury: TreasuryRepository;
   remises: RemiseRepository;
   unpaid: UnpaidRepository;
+  stats: StatsRepository;
   renderPdf: PdfRenderer;
 }
 
@@ -22,6 +25,7 @@ export function createBusinessPagesRouter(prefix: '/po' | '/client', deps: Busin
   const treasury = createTreasuryController(deps.treasury, deps.renderPdf);
   const remises = createRemiseController(deps.remises, deps.renderPdf);
   const unpaid = createUnpaidController(deps.unpaid, deps.renderPdf);
+  const stats = createStatsController(deps.stats, deps.renderPdf);
 
   router.get(`${prefix}/tresorerie`, treasury.page);
   router.get(`${prefix}/tresorerie/export`, treasury.export);
@@ -30,6 +34,9 @@ export function createBusinessPagesRouter(prefix: '/po' | '/client', deps: Busin
   router.get(`${prefix}/remises/:numero/export`, remises.exportDetail);
   router.get(`${prefix}/impayes`, unpaid.page);
   router.get(`${prefix}/impayes/export`, unpaid.export);
+  router.get(`${prefix}/statistiques`, stats.page);
+  router.get(`${prefix}/statistiques/donnees`, stats.data);
+  router.get(`${prefix}/statistiques/export`, stats.export);
 
   return router;
 }
