@@ -15,8 +15,83 @@ header {
   padding: 1rem 2rem;
 }
 
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Menu principal de chaque espace (admin/po/client) */
+.nav-principale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  margin-top: 0.75rem;
+}
+
+.nav-role {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.nav-principale ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-principale a {
+  display: block;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-principale a:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.nav-principale a[aria-current='page'] {
+  background: #fff;
+  color: #0b3d91;
+  font-weight: 600;
+}
+
 main {
   padding: 2rem;
+}
+
+/* Cartes de raccourcis sur les pages d'accueil */
+.raccourcis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.raccourcis a {
+  display: block;
+  padding: 1.25rem;
+  border: 1px solid #d8dde6;
+  border-radius: 6px;
+  background: #fff;
+  color: #0b3d91;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.raccourcis a:hover {
+  border-color: #0b3d91;
+}
+
+.a-venir {
+  color: #666;
+  font-style: italic;
 }
 
 footer {

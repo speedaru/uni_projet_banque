@@ -3,6 +3,7 @@ import session from 'express-session';
 import path from 'node:path';
 
 import { indexRouter } from './routes/index';
+import { createRoleRouter } from './routes/roles';
 
 export function createApp() {
   const app = express();
@@ -29,6 +30,9 @@ export function createApp() {
   );
 
   app.use('/', indexRouter);
+  app.use(createRoleRouter('admin'));
+  app.use(createRoleRouter('po'));
+  app.use(createRoleRouter('client'));
 
   return app;
 }

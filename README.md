@@ -94,11 +94,11 @@ src/
   routes/        → définitions de routes (par rôle : admin/po/client)
   controllers/   → gestion des requêtes/réponses (à créer au fil des epics)
   services/      → logique métier (à créer au fil des epics)
-  lib/           → utilitaires partagés (ex. client Prisma)
+  lib/           → utilitaires partagés (ex. client Prisma, menus de navigation par rôle)
   generated/     → code généré par Prisma, jamais commité
   app.ts         → configuration de l'application Express
   server.ts      → point d'entrée (démarre le serveur)
-views/           → templates EJS
+views/           → templates EJS (admin/, po/, client/ : pages de chaque espace ; partials/ : en-tête, menu, pied de page)
 public/          → fichiers statiques (CSS, JS client)
 prisma/          → schéma de base de données et migrations
 tests/           → tests automatisés (Jest + Supertest)
