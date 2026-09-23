@@ -6,6 +6,12 @@ import type { Role } from '../../src/lib/navigation';
 import type { PdfRenderer } from '../../src/services/export/pdfExport';
 import type { RemiseRepository, RemiseRow } from '../../src/services/remiseRepository';
 import type { TreasuryRepository, TreasuryRow } from '../../src/services/treasuryRepository';
+import type {
+  UnpaidFilters,
+  UnpaidRepository,
+  UnpaidRow,
+  UnpaidSummaryRow,
+} from '../../src/services/unpaidRepository';
 import type { UserRecord, UserRepository } from '../../src/services/userRepository';
 
 // Version en mémoire du UserRepository : les tests tournent sans PostgreSQL (CI comprise)
@@ -132,6 +138,106 @@ function toRemiseRow(remise: (typeof testRemises)[number]): RemiseRow {
   };
 }
 
+// Impayés de test (montants négatifs)
+export const testUnpaid: UnpaidRow[] = [
+  {
+    siren: '552100554',
+    raisonSociale: 'Garage Leroy',
+    dateVente: '2026-06-01',
+    dateRemise: '2026-06-02',
+    numeroCarte: '49701*******0001',
+    reseau: 'CB',
+    numeroDossier: 'D0001',
+    devise: 'EUR',
+    montant: -250,
+    motifCode: '02',
+    libelle: 'compte à découvert',
+  },
+  {
+    siren: '552100554',
+    raisonSociale: 'Garage Leroy',
+    dateVente: '2026-06-09',
+    dateRemise: '2026-06-10',
+    numeroCarte: '51234*******0002',
+    reseau: 'MC',
+    numeroDossier: 'D0002',
+    devise: 'EUR',
+    montant: -45.5,
+    motifCode: '05',
+    libelle: 'provision insuffisante',
+  },
+  {
+    siren: '123456789',
+    raisonSociale: 'Boutique Démo',
+    dateVente: '2026-06-03',
+    dateRemise: '2026-06-03',
+    numeroCarte: '49701*******0003',
+    reseau: 'VS',
+    numeroDossier: 'D0003',
+    devise: 'EUR',
+    montant: -120,
+    motifCode: '01',
+    libelle: 'fraude à la carte',
+  },
+  {
+    siren: '456278556',
+    raisonSociale: 'Dupont SARL',
+    dateVente: '2026-06-30',
+    dateRemise: '2026-07-01',
+    numeroCarte: '37123*******0004',
+    reseau: 'AE',
+    numeroDossier: 'D0004',
+    devise: 'EUR',
+    montant: -380,
+    motifCode: '06',
+    libelle: 'opération contestée par le débiteur',
+  },
+];
+
+// Version en mémoire du UnpaidRepository
+export function createMemoryUnpaidRepository(): UnpaidRepository {
+  const matching = ({ siren, raisonSociale, dateDebut, dateFin, numeroDossier }: UnpaidFilters) =>
+    testUnpaid.filter(
+      (row) =>
+        (!siren || row.siren === siren) &&
+        (!raisonSociale || row.raisonSociale.toLowerCase().includes(raisonSociale.toLowerCase())) &&
+        (!dateDebut || row.dateRemise >= dateDebut) &&
+        (!dateFin || row.dateRemise <= dateFin) &&
+        (!numeroDossier || row.numeroDossier.toLowerCase().includes(numeroDossier.toLowerCase())),
+    );
+
+  return {
+    async search(filters, { key, order }, { page, pageSize }) {
+      const direction = order === 'asc' ? 1 : -1;
+      const rows = [...matching(filters)].sort((a, b) =>
+        key === 'montant'
+          ? (Math.abs(a.montant) - Math.abs(b.montant)) * direction
+          : a.dateRemise.localeCompare(b.dateRemise) * direction,
+      );
+      return {
+        total: rows.length,
+        totalAmount: rows.reduce((total, row) => total + row.montant, 0),
+        rows: rows.slice((page - 1) * pageSize, page * pageSize),
+      };
+    },
+    async summaryBySiren(filters) {
+      const summary = new Map<string, UnpaidSummaryRow>();
+      for (const row of matching(filters)) {
+        const line = summary.get(row.siren) ?? {
+          siren: row.siren,
+          raisonSociale: row.raisonSociale,
+          count: 0,
+          totalAmount: 0,
+        };
+        line.count += 1;
+        line.totalAmount += row.montant;
+        summary.set(row.siren, line);
+      }
+      return [...summary.values()].sort((a, b) => a.siren.localeCompare(b.siren));
+    },
+  };
+}
+
 // Générateur de PDF factice : renvoie le HTML du rapport préfixé d'un en-tête PDF,
 // ce qui permet de vérifier le contenu sans lancer de navigateur
 export const fakePdfRenderer: PdfRenderer = async (html, { landscape }) =>
@@ -171,7 +277,11 @@ export function createTestApp() {
   const users = createMemoryUserRepository();
   const treasury = createMemoryTreasuryRepository();
   const remises = createMemoryRemiseRepository();
-  return { app: createApp({ users, treasury, remises, renderPdf: fakePdfRenderer }), users };
+  const unpaid = createMemoryUnpaidRepository();
+  return {
+    app: createApp({ users, treasury, remises, unpaid, renderPdf: fakePdfRenderer }),
+    users,
+  };
 }
 
 const passwords: Record<Role, string> = { admin: 'admin123', po: 'po123', client: 'client123' };

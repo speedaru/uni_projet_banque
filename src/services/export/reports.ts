@@ -1,6 +1,7 @@
 import { formatIsoDate } from '../../lib/format';
 import type { RemiseFilters, RemiseRow } from '../remiseRepository';
 import type { TreasuryFilters, TreasuryRow } from '../treasuryRepository';
+import type { UnpaidFilters, UnpaidRow } from '../unpaidRepository';
 import { sumTreasury } from '../treasuryService';
 import { extractionLabel, fileDate, formatSiren, Report, reportTitle } from './report';
 
@@ -60,7 +61,7 @@ export function treasuryReport(filters: TreasuryFilters, rows: TreasuryRow[], no
   return report;
 }
 
-function periodLabel({ dateDebut, dateFin }: RemiseFilters): string {
+function periodLabel({ dateDebut, dateFin }: { dateDebut?: string; dateFin?: string }): string {
   if (dateDebut && dateFin) {
     return ` du ${formatIsoDate(dateDebut)} au ${formatIsoDate(dateFin)}`;
   }
@@ -107,6 +108,52 @@ export function remisesReport(filters: RemiseFilters, rows: RemiseRow[], now = n
       row.totalAmount,
       sens(row.totalAmount),
     ]),
+  };
+  return report;
+}
+
+export function unpaidReport(
+  filters: UnpaidFilters,
+  rows: UnpaidRow[],
+  totalAmount: number,
+  now = new Date(),
+) {
+  const subject = companySubject(
+    filters.siren,
+    rows[0]?.raisonSociale,
+    filters.raisonSociale
+      ? `des entreprises « ${filters.raisonSociale} »`
+      : 'de toutes les entreprises',
+  );
+  const dossier = filters.numeroDossier ? ` (N° dossier : ${filters.numeroDossier})` : '';
+
+  const report: Report = {
+    fileName: `impayes_${fileDate(now)}`,
+    title: reportTitle(`Liste des impayés ${subject}${periodLabel(filters)}${dossier}`),
+    extractedAt: extractionLabel(now),
+    columns: [
+      { label: 'N° SIREN' },
+      { label: 'Date vente' },
+      { label: 'Date remise' },
+      { label: 'N° carte' },
+      { label: 'Réseau' },
+      { label: 'N° dossier impayé' },
+      { label: 'Devise' },
+      { label: 'Montant', type: 'amount' },
+      { label: 'Libellé impayé' },
+    ],
+    rows: rows.map((row) => [
+      row.siren,
+      formatIsoDate(row.dateVente),
+      formatIsoDate(row.dateRemise),
+      row.numeroCarte,
+      row.reseau,
+      row.numeroDossier,
+      row.devise,
+      row.montant,
+      row.libelle,
+    ]),
+    totals: ['Total', '', '', '', '', '', 'EUR', totalAmount, `${rows.length} impayé(s)`],
   };
   return report;
 }

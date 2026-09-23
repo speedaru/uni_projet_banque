@@ -45,9 +45,7 @@ describe('Espaces par rôle', () => {
 
   // Écrans du menu pas encore développés
   const comingSoon: [Role, string][] = [
-    ['po', '/po/impayes'],
     ['po', '/po/statistiques'],
-    ['client', '/client/impayes'],
     ['client', '/client/statistiques'],
   ];
 

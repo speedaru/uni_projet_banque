@@ -1,0 +1,213 @@
+<%- include('partials/header', { titre }) %>
+<%- include('partials/page-titre', {
+  icone: 'alert',
+  sousTitre: isClient
+    ? 'Les transactions impayées de votre entreprise et leurs motifs.'
+    : 'Les transactions impayées de vos comptes clients et leurs motifs.',
+}) %>
+
+<%# Critères de sélection (spécifications, fonction 2.3) %>
+<form method="get" class="carte filtres">
+  <div class="champ">
+    <label for="siren">N° de SIREN</label>
+    <div class="champ-icone">
+      <%- icon('hash', 18) %>
+      <% if (isClient) { %>
+      <input id="siren" value="<%= clientSiren %>" readonly />
+      <% } else { %>
+      <input id="siren" name="siren" value="<%= filters.siren ?? '' %>" placeholder="Tous" inputmode="numeric" maxlength="11" />
+      <% } %>
+    </div>
+  </div>
+  <div class="champ">
+    <label for="raisonSociale">Raison sociale</label>
+    <div class="champ-icone">
+      <%- icon('building', 18) %>
+      <% if (isClient) { %>
+      <input id="raisonSociale" value="<%= clientRaisonSociale %>" readonly />
+      <% } else { %>
+      <input id="raisonSociale" name="raisonSociale" value="<%= filters.raisonSociale ?? '' %>" placeholder="Toutes" maxlength="20" />
+      <% } %>
+    </div>
+  </div>
+  <div class="champ">
+    <label for="numeroDossier">N° dossier impayé</label>
+    <div class="champ-icone">
+      <%- icon('search', 18) %>
+      <input id="numeroDossier" name="numeroDossier" value="<%= filters.numeroDossier ?? '' %>" placeholder="Ex. D0042" maxlength="5" />
+    </div>
+  </div>
+  <div class="champ">
+    <label for="dateDebut">Date de début</label>
+    <div class="champ-icone">
+      <%- icon('calendar', 18) %>
+      <input id="dateDebut" name="dateDebut" type="date" value="<%= filters.dateDebut ?? '' %>" />
+    </div>
+  </div>
+  <div class="champ">
+    <label for="dateFin">Date de fin</label>
+    <div class="champ-icone">
+      <%- icon('calendar', 18) %>
+      <input id="dateFin" name="dateFin" type="date" value="<%= filters.dateFin ?? '' %>" />
+    </div>
+  </div>
+  <div class="champ champ-etroit">
+    <label for="lignes">Lignes par page</label>
+    <select id="lignes" name="lignes" class="liste">
+      <% pageSizes.forEach((size) => { %>
+      <option value="<%= size %>" <%= size === pagination.pageSize ? 'selected' : '' %>><%= size %></option>
+      <% }) %>
+    </select>
+  </div>
+  <input type="hidden" name="tri" value="<%= sort.key %>" />
+  <input type="hidden" name="ordre" value="<%= sort.order %>" />
+  <div class="actions">
+    <button type="submit" class="bouton bouton-principal"><%- icon('search', 18) %> Rechercher</button>
+    <a class="bouton bouton-fantome" href="?"><%- icon('reset', 18) %> Réinitialiser</a>
+  </div>
+</form>
+
+<% if (errors.length > 0) { %>
+<div class="alerte alerte-erreur" role="alert">
+  <%- icon('info', 20) %>
+  <ul>
+    <% errors.forEach((error) => { %>
+    <li><%= error %></li>
+    <% }) %>
+  </ul>
+</div>
+<% } else { %>
+<section class="indicateurs">
+  <div class="indicateur">
+    <span class="indicateur-icone teinte-danger"><%- icon('alert', 22) %></span>
+    <span class="indicateur-libelle">Impayés</span>
+    <strong><%= result.total %></strong>
+  </div>
+  <div class="indicateur">
+    <span class="indicateur-icone teinte-danger"><%- icon('wallet', 22) %></span>
+    <span class="indicateur-libelle">Montant total impayé</span>
+    <strong class="texte-negatif"><%= formatAmount(result.totalAmount) %> €</strong>
+  </div>
+  <div class="indicateur">
+    <span class="indicateur-icone teinte-3"><%- icon('building', 22) %></span>
+    <span class="indicateur-libelle"><%= isClient ? 'Impayé moyen' : 'Entreprises concernées' %></span>
+    <strong><%= isClient ? `${formatAmount(result.total ? result.totalAmount / result.total : 0)} €` : summary.length %></strong>
+  </div>
+</section>
+
+<% if (!isClient && summary.length > 0) { %>
+<%# Somme des impayés regroupée par SIREN, réservée au PO (Epic 3, US3) %>
+<section class="carte">
+  <div class="carte-entete">
+    <h2 class="carte-titre"><%- icon('building', 20) %> Somme des impayés par N° SIREN</h2>
+    <span class="pastille"><%= summary.length %> entreprise<%= summary.length > 1 ? 's' : '' %></span>
+  </div>
+  <div class="tableau-conteneur">
+    <table class="tableau">
+      <thead>
+        <tr>
+          <th>N° SIREN</th>
+          <th>Raison sociale</th>
+          <th class="nombre">Nombre d'impayés</th>
+          <th class="nombre">Montant total</th>
+          <th>Part du total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% summary.forEach((row) => { const share = result.totalAmount ? row.totalAmount / result.totalAmount : 0; %>
+        <tr>
+          <td><%= row.siren %></td>
+          <td><%= row.raisonSociale %></td>
+          <td class="nombre"><%= row.count %></td>
+          <td class="nombre negatif"><%= formatAmount(row.totalAmount) %></td>
+          <td>
+            <span class="barre-part" aria-label="<%= Math.round(share * 100) %> %">
+              <span style="width: <%= Math.round(share * 100) %>%"></span>
+            </span>
+            <small><%= Math.round(share * 100) %> %</small>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+<% } %>
+
+<section class="carte">
+  <div class="carte-entete">
+    <h2 class="carte-titre"><%- icon('alert', 20) %> Impayés</h2>
+    <span class="pastille nombre-resultats"><%= result.total %> résultat<%= result.total > 1 ? 's' : '' %></span>
+  </div>
+
+  <% if (result.rows.length === 0) { %>
+  <div class="etat-vide etat-vide-compact">
+    <img src="/img/illustration-a-venir.svg" alt="" width="180" height="125" />
+    <p>Aucun impayé pour ces critères.</p>
+  </div>
+  <% } else { %>
+  <%- include('partials/export', {
+    action: `${navigation[0].href}/impayes/export`,
+    params: exportParams,
+    id: 'export-impayes',
+    libelle: `Exporter les ${result.total} impayé${result.total > 1 ? 's' : ''}`,
+  }) %>
+
+  <%# Légende des couleurs par tranche de montant de 100 € (Epic 3, US4) %>
+  <ul class="legende-tranches" aria-label="Couleurs par tranche de montant">
+    <% amountBrackets.forEach((label, index) => { %>
+    <li><span class="pastille-tranche tranche-<%= index %>"></span><%= label %></li>
+    <% }) %>
+  </ul>
+
+  <%
+    const arrow = (key) => (sort.key === key ? (sort.order === 'asc' ? ' ▲' : ' ▼') : '');
+  %>
+  <div class="tableau-conteneur">
+    <table class="tableau tableau-impayes">
+      <thead>
+        <tr>
+          <th>N° SIREN</th>
+          <th>Date vente</th>
+          <th><a href="<%= dateSortUrl %>" class="tri<%= sort.key === 'date' ? ' tri-actif' : '' %>">Date remise<%= arrow('date') %></a></th>
+          <th>N° carte</th>
+          <th>Réseau</th>
+          <th>N° dossier</th>
+          <th>Devise</th>
+          <th class="nombre"><a href="<%= amountSortUrl %>" class="tri<%= sort.key === 'montant' ? ' tri-actif' : '' %>">Montant<%= arrow('montant') %></a></th>
+          <th>Libellé impayé</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% result.rows.forEach((row) => { %>
+        <tr class="tranche-<%= amountBracket(row.montant) %>">
+          <td><%= row.siren %></td>
+          <td><%= formatIsoDate(row.dateVente) %></td>
+          <td><%= formatIsoDate(row.dateRemise) %></td>
+          <td><span class="numero-carte"><%= row.numeroCarte %></span></td>
+          <td><span class="reseau reseau-<%= row.reseau.toLowerCase() %>"><%= row.reseau %></span></td>
+          <td><span class="numero-remise"><%= row.numeroDossier %></span></td>
+          <td><span class="devise"><%= row.devise %></span></td>
+          <td class="nombre negatif"><%= formatAmount(row.montant) %></td>
+          <td><span class="motif" title="Code motif <%= row.motifCode %>"><span class="motif-code"><%= row.motifCode %></span><%= row.libelle %></span></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (totalPages > 1) { %>
+  <nav class="pagination" aria-label="Pagination">
+    <% if (pagination.page > 1) { %>
+    <a class="bouton bouton-secondaire bouton-petit" href="<%= pageUrl(pagination.page - 1) %>">← Précédente</a>
+    <% } %>
+    <span>Page <strong><%= pagination.page %></strong> sur <%= totalPages %></span>
+    <% if (pagination.page < totalPages) { %>
+    <a class="bouton bouton-secondaire bouton-petit" href="<%= pageUrl(pagination.page + 1) %>">Suivante →</a>
+    <% } %>
+  </nav>
+  <% } %>
+  <% } %>
+</section>
+<% } %>
+<%- include('partials/footer') %>
