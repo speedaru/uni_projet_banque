@@ -60,6 +60,14 @@ export function createTreasuryController(treasury: TreasuryRepository, renderPdf
         rows,
         totals: sumTreasury(rows),
         exportParams: { ...params, tri: sort.key, ordre: sort.order },
+        // Données du graphique d'évolution (Epic 1, US7) : 4 derniers mois, mêmes entreprises
+        chartDataUrl: `${req.path.replace(/\/tresorerie$/, '/statistiques/donnees')}?${new URLSearchParams(
+          {
+            periode: '4mois',
+            ...(params.siren ? { siren: params.siren } : {}),
+            ...(params.raisonSociale ? { raisonSociale: params.raisonSociale } : {}),
+          },
+        )}`,
         clientSiren: user.siren ?? '',
         clientRaisonSociale: rows[0]?.raisonSociale ?? '',
       });

@@ -129,5 +129,58 @@
     });
   }
 
-  window.Graphiques = { dessinerEvolution, dessinerMotifs, COULEURS_MOTIFS };
+  // Évolution de la trésorerie (Epic 1, US7) : solde net par période (vert / rouge) et solde cumulé
+  function dessinerTresorerie(canvas, donnees) {
+    const soldes = donnees.revenue.map(
+      (ca, index) => Math.round((ca - donnees.unpaid[index]) * 100) / 100,
+    );
+    let cumul = 0;
+    const cumuls = soldes.map((solde) => (cumul = Math.round((cumul + solde) * 100) / 100));
+
+    return new Chart(canvas, {
+      data: {
+        labels: donnees.labels,
+        datasets: [
+          {
+            type: 'bar',
+            label: 'Solde net du mois (€)',
+            data: soldes,
+            backgroundColor: soldes.map((solde) => (solde < 0 ? '#d92d20' : '#14b8a6')),
+            borderRadius: 6,
+            order: 1,
+          },
+          {
+            type: 'line',
+            label: 'Solde cumulé (€)',
+            data: cumuls,
+            borderColor: '#2f5bea',
+            backgroundColor: '#2f5bea',
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 3,
+            order: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: (contexte) => ` ${contexte.dataset.label} : ${euros(contexte.parsed.y)}`,
+            },
+          },
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { ticks: { callback: (valeur) => euros(valeur) } },
+        },
+      },
+    });
+  }
+
+  window.Graphiques = { dessinerEvolution, dessinerMotifs, dessinerTresorerie, COULEURS_MOTIFS };
 })();

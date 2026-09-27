@@ -8,7 +8,11 @@ import type { PdfRenderer } from '../services/export/pdfExport';
 import type { RemiseRepository } from '../services/remiseRepository';
 import type { StatsRepository } from '../services/statsRepository';
 import type { TreasuryRepository } from '../services/treasuryRepository';
+import { buildChartData, parseStatsCriteria } from '../services/statsService';
+import { sumTreasury } from '../services/treasuryService';
 import type { UnpaidRepository } from '../services/unpaidRepository';
+import '../lib/session';
+import type { HomeLoader } from './roles';
 
 export interface BusinessDependencies {
   treasury: TreasuryRepository;
@@ -39,4 +43,34 @@ export function createBusinessPagesRouter(prefix: '/po' | '/client', deps: Busin
   router.get(`${prefix}/statistiques/export`, stats.export);
 
   return router;
+}
+
+// Indicateurs de la page d'accueil du PO et du client : solde global (toutes dates)
+// et impayés des 4 derniers mois, limités à son entreprise pour le client (Epic 7)
+export function createHomeLoader(deps: BusinessDependencies): HomeLoader {
+  return async (req) => {
+    const user = req.session.user!;
+    const siren = user.role === 'client' ? user.siren : undefined;
+    if (user.role === 'client' && !siren) {
+      return {};
+    }
+
+    const { filters } = parseStatsCriteria({ periode: '4mois' });
+    filters.siren = siren;
+    const [rows, points] = await Promise.all([
+      deps.treasury.findAnnouncements({ siren }),
+      deps.stats.evolution(filters),
+    ]);
+    const chart = buildChartData(filters, points, []);
+
+    return {
+      kpis: {
+        balance: sumTreasury(rows).totalAmount,
+        negativeAccounts: rows.filter((row) => row.totalAmount < 0).length,
+        unpaid: chart.totals.unpaid,
+        unpaidCount: chart.totals.unpaidCount,
+        rate: chart.totals.rate,
+      },
+    };
+  };
 }

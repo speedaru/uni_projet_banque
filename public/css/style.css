@@ -647,6 +647,19 @@ img {
   box-shadow: var(--ombre);
 }
 
+.indicateur-lien {
+  color: var(--texte);
+  text-decoration: none;
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
+}
+
+.indicateur-lien:hover {
+  box-shadow: var(--ombre-forte);
+  transform: translateY(-2px);
+}
+
 .indicateur-icone {
   display: grid;
   grid-row: span 2;
@@ -1509,6 +1522,16 @@ img {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+}
+
+.code-erreur {
+  margin: 0;
+  background: linear-gradient(135deg, var(--primaire), var(--violet));
+  background-clip: text;
+  color: transparent !important;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .a-venir {

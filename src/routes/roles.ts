@@ -1,11 +1,14 @@
-import { Router } from 'express';
+import { Request, Router } from 'express';
 
 import { navigation, Role, roleLabels } from '../lib/navigation';
 import { requireRole } from '../middlewares/requireRole';
 
+// Données supplémentaires de la page d'accueil (ex. indicateurs du PO et du client)
+export type HomeLoader = (req: Request) => Promise<Record<string, unknown>>;
+
 // Crée le routeur d'un espace (admin, po ou client) : contrôle d'accès, page d'accueil,
 // écrans déjà développés (`pages`), puis une page « à venir » pour les autres écrans du menu.
-export function createRoleRouter(role: Role, pages?: Router) {
+export function createRoleRouter(role: Role, pages?: Router, loadHome?: HomeLoader) {
   const router = Router();
   const [home, ...links] = navigation[role];
 
@@ -21,8 +24,9 @@ export function createRoleRouter(role: Role, pages?: Router) {
     next();
   });
 
-  router.get(home.href, (_req, res) => {
-    res.render(`${role}/accueil`, { titre: `Espace ${roleLabels[role]}` });
+  router.get(home.href, async (req, res) => {
+    const extra = loadHome ? await loadHome(req) : {};
+    res.render(`${role}/accueil`, { titre: `Espace ${roleLabels[role]}`, ...extra });
   });
 
   if (pages) {

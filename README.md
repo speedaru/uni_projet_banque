@@ -8,12 +8,28 @@ Pour le contexte complet (sujet, backlog, choix techniques détaillés, modèle 
 
 ## Sommaire
 
+- [Fonctionnalités](#fonctionnalités)
 - [Prérequis](#prérequis)
 - [Installation](#installation)
 - [Structure du projet](#structure-du-projet)
 - [Workflow de contribution](#workflow-de-contribution)
 - [Documentation](#documentation)
 - [Équipe](#équipe)
+
+## Fonctionnalités
+
+| Écran                           | Profils    | Contenu                                                                                                                                  |
+| ------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Connexion (Epic 6)              | Tous       | Bouton « œil », bandeau « dernier essai » après 2 échecs, identifiant bloqué 5 min au 3e échec                                           |
+| Accueil                         | PO, Client | Indicateurs : solde global, impayés et taux d'impayés sur 4 mois, comptes en négatif (PO)                                                |
+| Annonces de trésorerie (Epic 1) | PO, Client | Filtres SIREN / raison sociale / date de valeur, tri par SIREN ou montant, soldes négatifs en rouge, graphique d'évolution sur 4 mois    |
+| Recherche de remises (Epic 2)   | PO, Client | Filtres + N° de remise, nombre de résultats, lignes par page, détail des transactions dépliable                                          |
+| Recherche des impayés (Epic 3)  | PO, Client | Filtres + N° de dossier, tri par montant, somme par SIREN (PO), couleurs par tranche de 100 €                                            |
+| Statistiques (Epic 4)           | PO, Client | 4 / 12 mois glissants ou plage de dates, histogramme ou courbe, comparaison au chiffre d'affaires, camembert par motif, impression / PDF |
+| Exports (Epic 5)                | PO, Client | XLS, CSV et PDF de chaque tableau, titre en majuscules et mention « EXTRAIT DU jj/mm/aaaa »                                              |
+| Comptes clients (Epic 7)        | Admin      | Création / suppression de comptes clients avec l'accord du Product Owner                                                                 |
+
+Contrôle d'accès (Epic 7) : le client ne voit que les données de son SIREN (y compris en modifiant l'URL), l'admin n'a accès à aucune donnée métier.
 
 ## Prérequis
 

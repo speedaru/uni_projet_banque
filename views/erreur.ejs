@@ -1,0 +1,12 @@
+<%- include('partials/header', { titre }) %>
+<section class="carte etat-vide">
+  <img src="/img/illustration-a-venir.svg" alt="" width="260" height="180" />
+  <p class="code-erreur"><%= code %></p>
+  <h1><%= titre %></h1>
+  <p><%= message %></p>
+  <%# Retour vers l'accueil de l'espace de l'utilisateur connecté, sinon vers la connexion %>
+  <a class="bouton bouton-principal" href="<%= locals.user ? { admin: '/admin', po: '/po', client: '/client' }[user.role] : '/connexion' %>">
+    <%- icon('home', 18) %> <%= locals.user ? "Retour à l'accueil" : 'Aller à la connexion' %>
+  </a>
+</section>
+<%- include('partials/footer') %>
