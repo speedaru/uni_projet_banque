@@ -80,7 +80,7 @@
   </ul>
 </div>
 <% } else { %>
-<div data-donnees="<%= dataUrl %>">
+<div data-donnees="<%= dataUrl %>" data-liste-impayes="<%= unpaidListUrl %>">
   <div class="barre-actions">
     <p class="periode-affichee"><%- icon('calendar', 18) %> Du <strong><%= formatIsoDate(filters.dateDebut) %></strong> au <strong><%= formatIsoDate(filters.dateFin) %></strong></p>
     <div class="actions-impression">
@@ -124,6 +124,7 @@
 
   <section class="carte" id="bloc-motifs">
     <h2 class="carte-titre"><%- icon('alert', 20) %> Impayés par motif</h2>
+    <p class="aide-tableau"><%- icon('info', 16) %> Cliquez sur un motif (camembert ou tableau) pour afficher la liste de ses impayés.</p>
     <div class="grille-motifs">
       <div class="zone-graphique zone-camembert">
         <canvas id="graphique-motifs" role="img" aria-label="Répartition des impayés par motif"></canvas>

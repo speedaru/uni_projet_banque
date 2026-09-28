@@ -37,6 +37,16 @@
       <input id="numeroDossier" name="numeroDossier" value="<%= filters.numeroDossier ?? '' %>" placeholder="Ex. D0042" maxlength="5" />
     </div>
   </div>
+  <%# Liste des impayés d'un motif (Epic 4, US5) %>
+  <div class="champ">
+    <label for="motifCode">Motif d'impayé</label>
+    <select id="motifCode" name="motifCode" class="liste">
+      <option value="">Tous les motifs</option>
+      <% motifs.forEach((motif) => { %>
+      <option value="<%= motif.code %>" <%= filters.motifCode === motif.code ? 'selected' : '' %>><%= motif.code %> — <%= motif.libelle %></option>
+      <% }) %>
+    </select>
+  </div>
   <div class="champ">
     <label for="dateDebut">Date de début</label>
     <div class="champ-icone">
@@ -102,6 +112,12 @@
     <h2 class="carte-titre"><%- icon('building', 20) %> Somme des impayés par N° SIREN</h2>
     <span class="pastille"><%= summary.length %> entreprise<%= summary.length > 1 ? 's' : '' %></span>
   </div>
+  <%- include('partials/export', {
+    action: `${navigation[0].href}/impayes/synthese/export`,
+    params: exportParams,
+    id: 'export-synthese',
+    libelle: 'Exporter la synthèse',
+  }) %>
   <div class="tableau-conteneur">
     <table class="tableau">
       <thead>

@@ -53,7 +53,16 @@
       '<p class="texte-secondaire">Aucun impayé sur la période.</p>';
     return;
   }
-  window.Graphiques.dessinerMotifs(document.getElementById('graphique-motifs'), donnees);
+  // Liste des impayés d'un motif sur la même période (Epic 4, US5)
+  const listeMotif = (motif) => {
+    const url = new URL(page.dataset.listeImpayes, window.location.href);
+    url.searchParams.set('motifCode', motif.code);
+    return url.pathname + url.search;
+  };
+
+  window.Graphiques.dessinerMotifs(document.getElementById('graphique-motifs'), donnees, {
+    surClic: (motif) => window.location.assign(listeMotif(motif)),
+  });
 
   const total = donnees.motifs.reduce((somme, motif) => somme + motif.amount, 0);
   donnees.motifs.forEach((motif, index) => {
@@ -62,11 +71,14 @@
     ligne.innerHTML =
       `<td><span class="pastille-tranche" style="background:${couleur}"></span></td>` +
       `<td><span class="motif-code">${motif.code}</span></td>` +
-      '<td class="libelle"></td>' +
+      '<td class="libelle"><a></a></td>' +
       `<td class="nombre">${motif.count}</td>` +
       `<td class="nombre negatif">${euros(-motif.amount)}</td>` +
       `<td class="nombre">${Math.round((motif.amount / total) * 100)} %</td>`;
     // Libellé inséré en texte pour éviter toute injection HTML
-    ligne.querySelector('.libelle').textContent = motif.libelle;
+    const lien = ligne.querySelector('.libelle a');
+    lien.textContent = motif.libelle;
+    lien.href = listeMotif(motif);
+    lien.title = 'Voir la liste des impayés de ce motif';
   });
 })();

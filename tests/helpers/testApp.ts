@@ -202,14 +202,17 @@ export const testUnpaid: UnpaidRow[] = [
 
 // Version en mémoire du UnpaidRepository
 export function createMemoryUnpaidRepository(): UnpaidRepository {
-  const matching = ({ siren, raisonSociale, dateDebut, dateFin, numeroDossier }: UnpaidFilters) =>
+  const matching = (filters: UnpaidFilters) =>
     testUnpaid.filter(
       (row) =>
-        (!siren || row.siren === siren) &&
-        (!raisonSociale || row.raisonSociale.toLowerCase().includes(raisonSociale.toLowerCase())) &&
-        (!dateDebut || row.dateRemise >= dateDebut) &&
-        (!dateFin || row.dateRemise <= dateFin) &&
-        (!numeroDossier || row.numeroDossier.toLowerCase().includes(numeroDossier.toLowerCase())),
+        (!filters.siren || row.siren === filters.siren) &&
+        (!filters.raisonSociale ||
+          row.raisonSociale.toLowerCase().includes(filters.raisonSociale.toLowerCase())) &&
+        (!filters.dateDebut || row.dateRemise >= filters.dateDebut) &&
+        (!filters.dateFin || row.dateRemise <= filters.dateFin) &&
+        (!filters.numeroDossier ||
+          row.numeroDossier.toLowerCase().includes(filters.numeroDossier.toLowerCase())) &&
+        (!filters.motifCode || row.motifCode === filters.motifCode),
     );
 
   return {

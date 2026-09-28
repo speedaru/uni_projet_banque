@@ -1,3 +1,4 @@
+import { motifLabel } from '../lib/motifs';
 import { Query, readIsoDate, readSiren, text } from './searchCriteria';
 import { withoutEmpty } from './treasuryService';
 import type { UnpaidFilters, UnpaidSort } from './unpaidRepository';
@@ -11,8 +12,12 @@ export function parseUnpaidFilters(query: Query): { filters: UnpaidFilters; erro
     dateDebut: readIsoDate(query.dateDebut, 'La date de début', errors),
     dateFin: readIsoDate(query.dateFin, 'La date de fin', errors),
     numeroDossier: text(query.numeroDossier) || undefined,
+    motifCode: text(query.motifCode) || undefined,
   };
 
+  if (filters.motifCode && !motifLabel(filters.motifCode)) {
+    errors.push("Le motif d'impayé est inconnu.");
+  }
   if (filters.dateDebut && filters.dateFin && filters.dateDebut > filters.dateFin) {
     errors.push('La date de début doit être antérieure ou égale à la date de fin.');
   }

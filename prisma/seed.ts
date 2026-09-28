@@ -6,6 +6,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcrypt';
 
 import { PrismaClient } from '../src/generated/prisma/client';
+import { MOTIFS_IMPAYES } from '../src/lib/motifs';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -28,16 +29,7 @@ const entreprises = [
   { siren: '390114752', raisonSociale: 'TechStore Paris', unpaidRate: 0.12 },
 ];
 
-const motifs = [
-  { code: '01', libelle: 'fraude à la carte' },
-  { code: '02', libelle: 'compte à découvert' },
-  { code: '03', libelle: 'compte clôturé' },
-  { code: '04', libelle: 'compte bloqué' },
-  { code: '05', libelle: 'provision insuffisante' },
-  { code: '06', libelle: 'opération contestée par le débiteur' },
-  { code: '07', libelle: 'titulaire décédé' },
-  { code: '08', libelle: 'raison non communiquée, contactez la banque du client' },
-];
+const motifs = MOTIFS_IMPAYES;
 
 const reseaux = ['CB', 'CB', 'CB', 'VS', 'VS', 'MC', 'MC', 'AE'];
 
