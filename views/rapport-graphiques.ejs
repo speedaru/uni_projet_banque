@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= title %></title>
+    <%# Page convertie en PDF par Puppeteer : styles, Chart.js et données intégrés %>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { background: #fff; }
+      body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5px; color: #101828; }
+      .bandeau { display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 3px solid #2f5bea; }
+      .marque { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+      .logo { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #3b6cff, #14b8a6); }
+      .extrait { color: #5d6b82; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; }
+      h1 { margin: 0 0 12px; font-size: 14px; color: #0b1b34; }
+      h2 { margin: 16px 0 8px; font-size: 12px; color: #0b1b34; }
+      .chiffres { display: flex; gap: 10px; margin-bottom: 8px; }
+      .chiffre { flex: 1; padding: 8px 10px; border: 1px solid #e3e8f1; border-radius: 8px; }
+      .chiffre span { display: block; color: #5d6b82; font-size: 9px; }
+      .chiffre strong { font-size: 13px; }
+      .negatif { color: #d92d20; }
+      .motifs { display: flex; gap: 16px; align-items: flex-start; page-break-inside: avoid; }
+      table { flex: 1; border-collapse: collapse; }
+      th { padding: 5px 7px; background: #0b1b34; color: #fff; font-size: 9px; text-align: left; text-transform: uppercase; }
+      td { padding: 5px 7px; border-bottom: 1px solid #e3e8f1; }
+      .nombre { text-align: right; white-space: nowrap; }
+      .puce { display: inline-block; width: 9px; height: 9px; border-radius: 2px; }
+    </style>
+  </head>
+  <body>
+    <div class="bandeau">
+      <span class="marque"><span class="logo"></span><strong>Portail Web</strong> Monétique</span>
+      <span class="extrait"><%= extractedAt %></span>
+    </div>
+    <h1><%= title %></h1>
+
+    <div class="chiffres">
+      <div class="chiffre"><span>Montant des impayés</span><strong class="negatif"><%= formatAmount(data.totals.unpaid) %> €</strong></div>
+      <div class="chiffre"><span>Nombre d'impayés</span><strong><%= data.totals.unpaidCount %></strong></div>
+      <div class="chiffre"><span>Chiffre d'affaires</span><strong><%= formatAmount(data.totals.revenue) %> €</strong></div>
+      <div class="chiffre"><span>Taux d'impayés</span><strong><%= String(data.totals.rate).replace('.', ',') %> %</strong></div>
+    </div>
+
+    <h2>ÉVOLUTION DES IMPAYÉS ET DU CHIFFRE D'AFFAIRES</h2>
+    <div style="width: 1000px; height: 300px"><canvas id="evolution" width="1000" height="300"></canvas></div>
+
+    <h2>IMPAYÉS PAR MOTIF</h2>
+    <div class="motifs">
+      <div style="width: 260px; height: 240px"><canvas id="motifs" width="260" height="240"></canvas></div>
+      <table>
+        <thead>
+          <tr><th></th><th>Code</th><th>Motif</th><th class="nombre">Nombre</th><th class="nombre">Montant</th></tr>
+        </thead>
+        <tbody>
+          <% data.motifs.forEach((motif, index) => { %>
+          <tr>
+            <td><span class="puce" data-index="<%= index %>"></span></td>
+            <td><%= motif.code %></td>
+            <td><%= motif.libelle %></td>
+            <td class="nombre"><%= motif.count %></td>
+            <td class="nombre negatif"><%= formatAmount(-motif.amount) %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <script><%- chartScript %></script>
+    <script><%- graphScript %></script>
+    <script>
+      // Dessin immédiat, sans animation ni redimensionnement, avant la génération du PDF
+      const donnees = <%- dataJson %>;
+      const options = { responsive: false, animation: false };
+      Graphiques.dessinerEvolution(document.getElementById('evolution'), donnees, '<%= chartType === 'courbe' ? 'courbe' : 'histogramme' %>', options);
+      if (donnees.motifs.length > 0) {
+        Graphiques.dessinerMotifs(document.getElementById('motifs'), donnees, { ...options, legend: false });
+      }
+      document.querySelectorAll('.puce').forEach((puce) => {
+        puce.style.background = Graphiques.COULEURS_MOTIFS[Number(puce.dataset.index) % 8];
+      });
+    </script>
+  </body>
+</html>

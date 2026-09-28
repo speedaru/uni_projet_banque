@@ -647,6 +647,19 @@ img {
   box-shadow: var(--ombre);
 }
 
+.indicateur-lien {
+  color: var(--texte);
+  text-decoration: none;
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
+}
+
+.indicateur-lien:hover {
+  box-shadow: var(--ombre-forte);
+  transform: translateY(-2px);
+}
+
 .indicateur-icone {
   display: grid;
   grid-row: span 2;
@@ -1233,6 +1246,258 @@ img {
   background: #2e77bb;
 }
 
+/* Export XLS / CSV / PDF (Epic 5) */
+.export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  background: #f7f9fc;
+}
+
+.export-formats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.export-formats legend {
+  float: left;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.5rem;
+  color: var(--texte-secondaire);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.export-format {
+  position: relative;
+  cursor: pointer;
+}
+
+.export-format input {
+  position: absolute;
+  opacity: 0;
+}
+
+.export-format span {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--texte-secondaire);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.export-format input:checked + span {
+  border-color: var(--primaire);
+  background: var(--primaire);
+  color: #fff;
+}
+
+.export-format input:focus-visible + span {
+  box-shadow: var(--focus);
+}
+
+.detail-entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.detail-entete .detail-titre,
+.detail-entete .export {
+  margin: 0;
+}
+
+.detail-entete .export {
+  padding: 0.35rem 0.5rem;
+}
+
+/* Impayés : couleurs par tranche de montant de 100 € (Epic 3, US4) */
+.tranche-0 {
+  --tranche: #fdb022;
+  --tranche-fond: #fffaeb;
+}
+
+.tranche-1 {
+  --tranche: #f79009;
+  --tranche-fond: #fff4e5;
+}
+
+.tranche-2 {
+  --tranche: #ef6820;
+  --tranche-fond: #fef0e7;
+}
+
+.tranche-3 {
+  --tranche: #d92d20;
+  --tranche-fond: #fef3f2;
+}
+
+.tableau-impayes tbody tr {
+  background: var(--tranche-fond) !important;
+}
+
+.tableau-impayes tbody tr td:first-child {
+  box-shadow: inset 4px 0 0 var(--tranche);
+}
+
+.tableau-impayes tbody tr:hover {
+  filter: brightness(0.97);
+}
+
+.legende-tranches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  color: var(--texte-secondaire);
+  font-size: 0.83rem;
+  list-style: none;
+}
+
+.legende-tranches li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pastille-tranche {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--tranche);
+}
+
+.motif {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.motif-code {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--navy-900);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Part d'une entreprise dans le total des impayés */
+.barre-part {
+  display: inline-block;
+  width: 120px;
+  height: 8px;
+  margin-right: 0.5rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--bordure);
+  vertical-align: middle;
+}
+
+.barre-part span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--orange), var(--danger));
+}
+
+/* Statistiques (Epic 4) */
+.choix-groupe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.choix-groupe legend {
+  width: 100%;
+  margin-bottom: 0.35rem;
+  color: var(--texte-secondaire);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.barre-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.periode-affichee {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--texte-secondaire);
+}
+
+.actions-impression {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.indicateurs-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.zone-graphique {
+  position: relative;
+  height: 340px;
+  margin-top: 1rem;
+}
+
+.grille-motifs {
+  display: grid;
+  grid-template-columns: minmax(260px, 420px) 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.grille-motifs > * {
+  min-width: 0;
+}
+
+.zone-camembert {
+  height: 360px;
+}
+
+/* Libellés longs des motifs : retour à la ligne autorisé */
+#tableau-motifs .libelle {
+  min-width: 180px;
+  white-space: normal;
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -1248,10 +1513,25 @@ img {
   align-items: start;
 }
 
+/* Sans min-width: 0, un bloc de grille s'élargit à la taille de son tableau */
+.grille-admin > * {
+  min-width: 0;
+}
+
 .form-suppression {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+}
+
+.code-erreur {
+  margin: 0;
+  background: linear-gradient(135deg, var(--primaire), var(--violet));
+  background-clip: text;
+  color: transparent !important;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .a-venir {
@@ -1335,11 +1615,54 @@ img {
   }
 
   .filtres .actions {
+    flex-wrap: wrap;
     width: 100%;
   }
 
   .filtres .actions .bouton {
     flex: 1;
+  }
+}
+
+@media (max-width: 1100px) {
+  .indicateurs-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grille-motifs {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .indicateurs-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Impression (graphiques statistiques, Epic 4 US4) : uniquement le contenu utile */
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .entete,
+  .pied,
+  .filtres,
+  .actions-impression,
+  .export {
+    display: none !important;
+  }
+
+  .contenu {
+    max-width: none;
+    padding: 0;
+  }
+
+  .carte,
+  .indicateur {
+    box-shadow: none;
+    break-inside: avoid;
   }
 }
 

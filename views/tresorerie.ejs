@@ -89,6 +89,14 @@
     </h2>
     <span class="pastille nombre-resultats"><%= rows.length %> compte<%= rows.length > 1 ? 's' : '' %></span>
   </div>
+  <% if (rows.length > 0) { %>
+  <%- include('partials/export', {
+    action: `${navigation[0].href}/tresorerie/export`,
+    params: exportParams,
+    id: 'export-tresorerie',
+    libelle: 'Exporter le tableau',
+  }) %>
+  <% } %>
 
   <% if (rows.length === 0) { %>
   <div class="etat-vide etat-vide-compact">
@@ -137,5 +145,16 @@
   </div>
   <% } %>
 </section>
+<%# Évolution de la trésorerie sur les 4 derniers mois (Epic 1, US7) %>
+<section class="carte" data-graphique-tresorerie="<%= chartDataUrl %>">
+  <h2 class="carte-titre"><%- icon('chart', 20) %> Évolution de la trésorerie — 4 derniers mois</h2>
+  <p class="texte-secondaire">Solde net de chaque mois (paiements moins impayés) et solde cumulé.</p>
+  <div class="zone-graphique">
+    <canvas id="graphique-tresorerie" role="img" aria-label="Évolution mensuelle de la trésorerie"></canvas>
+  </div>
+</section>
+<script src="/vendor/chart.js/chart.umd.min.js"></script>
+<script src="/js/graphiques.js"></script>
+<script src="/js/tresorerie.js"></script>
 <% } %>
 <%- include('partials/footer') %>

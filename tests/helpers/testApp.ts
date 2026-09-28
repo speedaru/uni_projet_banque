@@ -3,8 +3,21 @@ import request from 'supertest';
 
 import { createApp } from '../../src/app';
 import type { Role } from '../../src/lib/navigation';
-import type { RemiseRepository } from '../../src/services/remiseRepository';
+import type { PdfRenderer } from '../../src/services/export/pdfExport';
+import type { RemiseRepository, RemiseRow } from '../../src/services/remiseRepository';
+import type {
+  MotifSlice,
+  StatsFilters,
+  StatsPoint,
+  StatsRepository,
+} from '../../src/services/statsRepository';
 import type { TreasuryRepository, TreasuryRow } from '../../src/services/treasuryRepository';
+import type {
+  UnpaidFilters,
+  UnpaidRepository,
+  UnpaidRow,
+  UnpaidSummaryRow,
+} from '../../src/services/unpaidRepository';
 import type { UserRecord, UserRepository } from '../../src/services/userRepository';
 
 // Version en mémoire du UserRepository : les tests tournent sans PostgreSQL (CI comprise)
@@ -100,29 +113,200 @@ export function createMemoryRemiseRepository(): RemiseRepository {
         )
         .sort((a, b) => b.date.localeCompare(a.date) || b.numero.localeCompare(a.numero));
 
-      const rows = matching.slice((page - 1) * pageSize, page * pageSize).map((remise) => ({
-        numero: remise.numero,
-        siren: remise.siren,
-        raisonSociale: remise.raisonSociale,
-        dateTraitement: remise.date,
-        devise: 'EUR',
-        transactionCount: remise.amounts.length,
-        totalAmount: remise.amounts.reduce((total, amount) => total + amount, 0),
-        transactions: remise.amounts.map((montant, index) => ({
-          siren: remise.siren,
-          dateVente: remise.date,
-          numeroCarte: `49701*******000${index}`,
-          reseau: 'CB',
-          numeroAutorisation: `${remise.numero.slice(-3)}00${index}`,
-          devise: 'EUR',
-          montant,
-        })),
-      }));
-
+      const rows = matching.slice((page - 1) * pageSize, page * pageSize).map(toRemiseRow);
       return { total: matching.length, rows };
+    },
+    async findByNumero(numero) {
+      const remise = testRemises.find((candidate) => candidate.numero === numero);
+      return remise ? toRemiseRow(remise) : null;
     },
   };
 }
+
+function toRemiseRow(remise: (typeof testRemises)[number]): RemiseRow {
+  return {
+    numero: remise.numero,
+    siren: remise.siren,
+    raisonSociale: remise.raisonSociale,
+    dateTraitement: remise.date,
+    devise: 'EUR',
+    transactionCount: remise.amounts.length,
+    totalAmount: remise.amounts.reduce((total, amount) => total + amount, 0),
+    transactions: remise.amounts.map((montant, index) => ({
+      siren: remise.siren,
+      dateVente: remise.date,
+      numeroCarte: `49701*******000${index}`,
+      reseau: 'CB',
+      numeroAutorisation: `${remise.numero.slice(-3)}00${index}`,
+      devise: 'EUR',
+      montant,
+    })),
+  };
+}
+
+// Impayés de test (montants négatifs)
+export const testUnpaid: UnpaidRow[] = [
+  {
+    siren: '552100554',
+    raisonSociale: 'Garage Leroy',
+    dateVente: '2026-06-01',
+    dateRemise: '2026-06-02',
+    numeroCarte: '49701*******0001',
+    reseau: 'CB',
+    numeroDossier: 'D0001',
+    devise: 'EUR',
+    montant: -250,
+    motifCode: '02',
+    libelle: 'compte à découvert',
+  },
+  {
+    siren: '552100554',
+    raisonSociale: 'Garage Leroy',
+    dateVente: '2026-06-09',
+    dateRemise: '2026-06-10',
+    numeroCarte: '51234*******0002',
+    reseau: 'MC',
+    numeroDossier: 'D0002',
+    devise: 'EUR',
+    montant: -45.5,
+    motifCode: '05',
+    libelle: 'provision insuffisante',
+  },
+  {
+    siren: '123456789',
+    raisonSociale: 'Boutique Démo',
+    dateVente: '2026-06-03',
+    dateRemise: '2026-06-03',
+    numeroCarte: '49701*******0003',
+    reseau: 'VS',
+    numeroDossier: 'D0003',
+    devise: 'EUR',
+    montant: -120,
+    motifCode: '01',
+    libelle: 'fraude à la carte',
+  },
+  {
+    siren: '456278556',
+    raisonSociale: 'Dupont SARL',
+    dateVente: '2026-06-30',
+    dateRemise: '2026-07-01',
+    numeroCarte: '37123*******0004',
+    reseau: 'AE',
+    numeroDossier: 'D0004',
+    devise: 'EUR',
+    montant: -380,
+    motifCode: '06',
+    libelle: 'opération contestée par le débiteur',
+  },
+];
+
+// Version en mémoire du UnpaidRepository
+export function createMemoryUnpaidRepository(): UnpaidRepository {
+  const matching = ({ siren, raisonSociale, dateDebut, dateFin, numeroDossier }: UnpaidFilters) =>
+    testUnpaid.filter(
+      (row) =>
+        (!siren || row.siren === siren) &&
+        (!raisonSociale || row.raisonSociale.toLowerCase().includes(raisonSociale.toLowerCase())) &&
+        (!dateDebut || row.dateRemise >= dateDebut) &&
+        (!dateFin || row.dateRemise <= dateFin) &&
+        (!numeroDossier || row.numeroDossier.toLowerCase().includes(numeroDossier.toLowerCase())),
+    );
+
+  return {
+    async search(filters, { key, order }, { page, pageSize }) {
+      const direction = order === 'asc' ? 1 : -1;
+      const rows = [...matching(filters)].sort((a, b) =>
+        key === 'montant'
+          ? (Math.abs(a.montant) - Math.abs(b.montant)) * direction
+          : a.dateRemise.localeCompare(b.dateRemise) * direction,
+      );
+      return {
+        total: rows.length,
+        totalAmount: rows.reduce((total, row) => total + row.montant, 0),
+        rows: rows.slice((page - 1) * pageSize, page * pageSize),
+      };
+    },
+    async summaryBySiren(filters) {
+      const summary = new Map<string, UnpaidSummaryRow>();
+      for (const row of matching(filters)) {
+        const line = summary.get(row.siren) ?? {
+          siren: row.siren,
+          raisonSociale: row.raisonSociale,
+          count: 0,
+          totalAmount: 0,
+        };
+        line.count += 1;
+        line.totalAmount += row.montant;
+        summary.set(row.siren, line);
+      }
+      return [...summary.values()].sort((a, b) => a.siren.localeCompare(b.siren));
+    },
+  };
+}
+
+// Version en mémoire du StatsRepository : impayés = testUnpaid, chiffre d'affaires = montants
+// positifs de testRemises, regroupés par mois ou par jour de la date de remise
+export function createMemoryStatsRepository(): StatsRepository {
+  const inScope = (
+    { siren, raisonSociale, dateDebut, dateFin }: StatsFilters,
+    row: { siren: string; raisonSociale: string; date: string },
+  ) =>
+    (!siren || row.siren === siren) &&
+    (!raisonSociale || row.raisonSociale.toLowerCase().includes(raisonSociale.toLowerCase())) &&
+    row.date >= dateDebut &&
+    row.date <= dateFin;
+
+  return {
+    async evolution(filters) {
+      const periodOf = (date: string) =>
+        filters.granularity === 'month' ? date.slice(0, 7) : date;
+      const points = new Map<string, StatsPoint>();
+      const point = (period: string) => {
+        if (!points.has(period)) {
+          points.set(period, { period, unpaidAmount: 0, unpaidCount: 0, revenue: 0 });
+        }
+        return points.get(period)!;
+      };
+      for (const row of testUnpaid) {
+        if (inScope(filters, { ...row, date: row.dateRemise })) {
+          const p = point(periodOf(row.dateRemise));
+          p.unpaidAmount += -row.montant;
+          p.unpaidCount += 1;
+        }
+      }
+      for (const remise of testRemises) {
+        if (inScope(filters, remise)) {
+          point(periodOf(remise.date)).revenue += remise.amounts
+            .filter((amount) => amount > 0)
+            .reduce((total, amount) => total + amount, 0);
+        }
+      }
+      return [...points.values()].sort((a, b) => a.period.localeCompare(b.period));
+    },
+    async byMotif(filters) {
+      const slices = new Map<string, MotifSlice>();
+      for (const row of testUnpaid) {
+        if (inScope(filters, { ...row, date: row.dateRemise })) {
+          const slice = slices.get(row.motifCode) ?? {
+            code: row.motifCode,
+            libelle: row.libelle,
+            count: 0,
+            amount: 0,
+          };
+          slice.count += 1;
+          slice.amount += -row.montant;
+          slices.set(row.motifCode, slice);
+        }
+      }
+      return [...slices.values()].sort((a, b) => b.amount - a.amount);
+    },
+  };
+}
+
+// Générateur de PDF factice : renvoie le HTML du rapport préfixé d'un en-tête PDF,
+// ce qui permet de vérifier le contenu sans lancer de navigateur
+export const fakePdfRenderer: PdfRenderer = async (html, { landscape }) =>
+  Buffer.from(`%PDF-FAKE landscape=${landscape}\n${html}`);
 
 // Version en mémoire du TreasuryRepository, même logique de cumul que la requête SQL
 export function createMemoryTreasuryRepository(): TreasuryRepository {
@@ -158,7 +342,12 @@ export function createTestApp() {
   const users = createMemoryUserRepository();
   const treasury = createMemoryTreasuryRepository();
   const remises = createMemoryRemiseRepository();
-  return { app: createApp({ users, treasury, remises }), users };
+  const unpaid = createMemoryUnpaidRepository();
+  const stats = createMemoryStatsRepository();
+  return {
+    app: createApp({ users, treasury, remises, unpaid, stats, renderPdf: fakePdfRenderer }),
+    users,
+  };
 }
 
 const passwords: Record<Role, string> = { admin: 'admin123', po: 'po123', client: 'client123' };

@@ -1,0 +1,153 @@
+<%- include('partials/header', { titre }) %>
+<%- include('partials/page-titre', {
+  icone: 'chart',
+  sousTitre: isClient
+    ? "Évolution des impayés de votre entreprise, comparée à votre chiffre d'affaires."
+    : "Évolution des impayés de vos comptes clients, comparée au chiffre d'affaires.",
+}) %>
+
+<%# Critères de sélection (spécifications, fonction 2.4) %>
+<form method="get" class="carte filtres filtres-stats">
+  <fieldset class="choix-groupe">
+    <legend>Période</legend>
+    <% [['4mois', '4 mois glissants'], ['12mois', '12 mois glissants'], ['plage', 'Plage de dates']].forEach(([value, label]) => { %>
+    <label class="export-format">
+      <input type="radio" name="periode" value="<%= value %>" <%= period === value ? 'checked' : '' %> />
+      <span><%= label %></span>
+    </label>
+    <% }) %>
+  </fieldset>
+  <div class="champ">
+    <label for="dateDebut">Date de début</label>
+    <div class="champ-icone">
+      <%- icon('calendar', 18) %>
+      <input id="dateDebut" name="dateDebut" type="date" value="<%= period === 'plage' ? filters.dateDebut : '' %>" />
+    </div>
+  </div>
+  <div class="champ">
+    <label for="dateFin">Date de fin</label>
+    <div class="champ-icone">
+      <%- icon('calendar', 18) %>
+      <input id="dateFin" name="dateFin" type="date" value="<%= period === 'plage' ? filters.dateFin : '' %>" />
+    </div>
+  </div>
+  <% if (isClient) { %>
+  <div class="champ">
+    <label for="siren">N° de SIREN</label>
+    <div class="champ-icone">
+      <%- icon('hash', 18) %>
+      <input id="siren" value="<%= clientSiren %>" readonly />
+    </div>
+  </div>
+  <% } else { %>
+  <div class="champ">
+    <label for="siren">N° de SIREN</label>
+    <div class="champ-icone">
+      <%- icon('hash', 18) %>
+      <input id="siren" name="siren" value="<%= filters.siren ?? '' %>" placeholder="Tous" inputmode="numeric" maxlength="11" />
+    </div>
+  </div>
+  <div class="champ">
+    <label for="raisonSociale">Raison sociale</label>
+    <div class="champ-icone">
+      <%- icon('building', 18) %>
+      <input id="raisonSociale" name="raisonSociale" value="<%= filters.raisonSociale ?? '' %>" placeholder="Toutes" maxlength="20" />
+    </div>
+  </div>
+  <% } %>
+  <fieldset class="choix-groupe">
+    <legend>Type de graphique</legend>
+    <% [['histogramme', 'Histogramme'], ['courbe', 'Courbe']].forEach(([value, label]) => { %>
+    <label class="export-format">
+      <input type="radio" name="type" value="<%= value %>" <%= chartType === value ? 'checked' : '' %> />
+      <span><%= label %></span>
+    </label>
+    <% }) %>
+  </fieldset>
+  <div class="actions">
+    <button type="submit" class="bouton bouton-principal"><%- icon('search', 18) %> Afficher</button>
+    <a class="bouton bouton-fantome" href="?"><%- icon('reset', 18) %> Réinitialiser</a>
+  </div>
+</form>
+
+<% if (errors.length > 0) { %>
+<div class="alerte alerte-erreur" role="alert">
+  <%- icon('info', 20) %>
+  <ul>
+    <% errors.forEach((error) => { %>
+    <li><%= error %></li>
+    <% }) %>
+  </ul>
+</div>
+<% } else { %>
+<div data-donnees="<%= dataUrl %>">
+  <div class="barre-actions">
+    <p class="periode-affichee"><%- icon('calendar', 18) %> Du <strong><%= formatIsoDate(filters.dateDebut) %></strong> au <strong><%= formatIsoDate(filters.dateFin) %></strong></p>
+    <div class="actions-impression">
+      <%# Impression ou export PDF des graphiques (Epic 4, US4) %>
+      <button type="button" class="bouton bouton-secondaire bouton-petit" id="bouton-imprimer"><%- icon('receipt', 16) %> Imprimer</button>
+      <a class="bouton bouton-secondaire bouton-petit" href="<%= pdfUrl %>"><%- icon('download', 16) %> Exporter en PDF</a>
+    </div>
+  </div>
+
+  <p class="texte-secondaire" id="etat-graphiques">Chargement des graphiques…</p>
+
+  <section class="indicateurs indicateurs-4">
+    <div class="indicateur">
+      <span class="indicateur-icone teinte-danger"><%- icon('alert', 22) %></span>
+      <span class="indicateur-libelle">Montant des impayés</span>
+      <strong class="texte-negatif" id="total-impayes">—</strong>
+    </div>
+    <div class="indicateur">
+      <span class="indicateur-icone teinte-3"><%- icon('hash', 22) %></span>
+      <span class="indicateur-libelle">Nombre d'impayés</span>
+      <strong id="nombre-impayes">—</strong>
+    </div>
+    <div class="indicateur">
+      <span class="indicateur-icone teinte-0"><%- icon('wallet', 22) %></span>
+      <span class="indicateur-libelle">Chiffre d'affaires</span>
+      <strong id="total-ca">—</strong>
+    </div>
+    <div class="indicateur">
+      <span class="indicateur-icone teinte-2"><%- icon('chart', 22) %></span>
+      <span class="indicateur-libelle">Taux d'impayés</span>
+      <strong id="taux-impayes">—</strong>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2 class="carte-titre"><%- icon('chart', 20) %> Évolution des impayés et du chiffre d'affaires</h2>
+    <div class="zone-graphique">
+      <canvas id="graphique-evolution" role="img" aria-label="Évolution des impayés et du chiffre d'affaires sur la période"></canvas>
+    </div>
+  </section>
+
+  <section class="carte" id="bloc-motifs">
+    <h2 class="carte-titre"><%- icon('alert', 20) %> Impayés par motif</h2>
+    <div class="grille-motifs">
+      <div class="zone-graphique zone-camembert">
+        <canvas id="graphique-motifs" role="img" aria-label="Répartition des impayés par motif"></canvas>
+      </div>
+      <div class="tableau-conteneur">
+        <table class="tableau">
+          <thead>
+            <tr>
+              <th><span class="visuellement-cache">Couleur</span></th>
+              <th>Code</th>
+              <th>Motif</th>
+              <th class="nombre">Nombre</th>
+              <th class="nombre">Montant</th>
+              <th class="nombre">Part</th>
+            </tr>
+          </thead>
+          <tbody id="tableau-motifs"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="/vendor/chart.js/chart.umd.min.js"></script>
+<script src="/js/graphiques.js"></script>
+<script src="/js/statistiques.js"></script>
+<% } %>
+<%- include('partials/footer') %>

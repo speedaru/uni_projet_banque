@@ -1,4 +1,4 @@
-<%# Page d'accueil d'un espace : bandeau de bienvenue + raccourcis (paramètre : intro) %>
+<%# Page d'accueil d'un espace : bandeau de bienvenue, indicateurs éventuels, raccourcis (paramètre : intro) %>
 <section class="hero">
   <div class="hero-texte">
     <span class="hero-badge"><%- icon('shield', 16) %> Espace <%= roleLabel %></span>
@@ -7,6 +7,40 @@
   </div>
   <img class="hero-illustration" src="/img/illustration-accueil.svg" alt="" width="320" height="200" />
 </section>
+
+<% if (locals.kpis) { %>
+<h2 class="section-titre">En un coup d'œil</h2>
+<section class="indicateurs indicateurs-4">
+  <a class="indicateur indicateur-lien" href="<%= navigation[0].href %>/tresorerie">
+    <span class="indicateur-icone teinte-0"><%- icon('wallet', 22) %></span>
+    <span class="indicateur-libelle">Solde global</span>
+    <strong class="<%= kpis.balance < 0 ? 'texte-negatif' : '' %>"><%= formatAmount(kpis.balance) %> €</strong>
+  </a>
+  <a class="indicateur indicateur-lien" href="<%= navigation[0].href %>/impayes">
+    <span class="indicateur-icone teinte-danger"><%- icon('alert', 22) %></span>
+    <span class="indicateur-libelle">Impayés · 4 derniers mois</span>
+    <strong class="texte-negatif"><%= formatAmount(kpis.unpaid) %> €</strong>
+  </a>
+  <a class="indicateur indicateur-lien" href="<%= navigation[0].href %>/statistiques">
+    <span class="indicateur-icone teinte-2"><%- icon('chart', 22) %></span>
+    <span class="indicateur-libelle">Taux d'impayés · 4 mois</span>
+    <strong><%= String(kpis.rate).replace('.', ',') %> %</strong>
+  </a>
+  <% if (role === 'po') { %>
+  <a class="indicateur indicateur-lien" href="<%= navigation[0].href %>/tresorerie?tri=montant&ordre=asc">
+    <span class="indicateur-icone <%= kpis.negativeAccounts > 0 ? 'teinte-danger' : 'teinte-1' %>"><%- icon('building', 22) %></span>
+    <span class="indicateur-libelle">Comptes en négatif</span>
+    <strong><%= kpis.negativeAccounts %></strong>
+  </a>
+  <% } else { %>
+  <a class="indicateur indicateur-lien" href="<%= navigation[0].href %>/impayes">
+    <span class="indicateur-icone teinte-3"><%- icon('hash', 22) %></span>
+    <span class="indicateur-libelle">Nombre d'impayés · 4 mois</span>
+    <strong><%= kpis.unpaidCount %></strong>
+  </a>
+  <% } %>
+</section>
+<% } %>
 
 <h2 class="section-titre">Accès rapide</h2>
 <%- include('raccourcis') %>

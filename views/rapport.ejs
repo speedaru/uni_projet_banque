@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= report.title %></title>
+    <%# Styles intégrés : la page est convertie en PDF par Puppeteer, sans accès au serveur %>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { background: #fff; }
+      body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5px; color: #101828; }
+      .bandeau { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 18px; border-bottom: 3px solid #2f5bea; }
+      .marque { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+      .logo { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, #3b6cff, #14b8a6); }
+      .extrait { color: #5d6b82; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; }
+      h1 { margin: 0 0 16px; font-size: 15px; line-height: 1.35; color: #0b1b34; }
+      table { width: 100%; border-collapse: collapse; }
+      th { padding: 7px 8px; background: #0b1b34; color: #fff; font-size: 9.5px; text-align: left; text-transform: uppercase; letter-spacing: 0.03em; }
+      td { padding: 6px 8px; border-bottom: 1px solid #e3e8f1; }
+      tbody tr:nth-child(even) td { background: #f7f9fc; }
+      tfoot td { border-top: 2px solid #0b1b34; font-weight: 700; background: #eef2fb; }
+      .nombre { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .negatif { color: #d92d20; font-weight: 700; }
+      .vide { padding: 24px; color: #5d6b82; text-align: center; }
+      tr { page-break-inside: avoid; }
+      thead { display: table-header-group; }
+    </style>
+  </head>
+  <body>
+    <div class="bandeau">
+      <span class="marque"><span class="logo"></span><strong>Portail Web</strong> Monétique</span>
+      <span class="extrait"><%= report.extractedAt %></span>
+    </div>
+    <h1><%= report.title %></h1>
+
+    <%
+      // Formate une cellule selon le type de sa colonne
+      const cell = (value, column) => {
+        if (typeof value !== 'number') return { text: value, className: '' };
+        if (column.type === 'amount') return { text: formatAmount(value), className: 'nombre' + (value < 0 ? ' negatif' : '') };
+        return { text: String(value), className: 'nombre' };
+      };
+      const headerClass = (column) => (column.type === 'amount' || column.type === 'integer' ? 'nombre' : '');
+    %>
+    <table>
+      <thead>
+        <tr>
+          <% report.columns.forEach((column) => { %>
+          <th class="<%= headerClass(column) %>"><%= column.label %></th>
+          <% }) %>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (report.rows.length === 0) { %>
+        <tr><td class="vide" colspan="<%= report.columns.length %>">Aucune donnée pour ces critères.</td></tr>
+        <% } %>
+        <% report.rows.forEach((row) => { %>
+        <tr>
+          <% row.forEach((value, index) => { const c = cell(value, report.columns[index]); %>
+          <td class="<%= c.className %>"><%= c.text %></td>
+          <% }) %>
+        </tr>
+        <% }) %>
+      </tbody>
+      <% if (report.totals) { %>
+      <tfoot>
+        <tr>
+          <% report.totals.forEach((value, index) => { const c = cell(value, report.columns[index]); %>
+          <td class="<%= c.className %>"><%= c.text %></td>
+          <% }) %>
+        </tr>
+      </tfoot>
+      <% } %>
+    </table>
+  </body>
+</html>

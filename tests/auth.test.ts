@@ -58,7 +58,7 @@ describe('Écran de connexion', () => {
     const response = await request(app)
       .post('/connexion')
       .type('form')
-      .send({ login: 'po', password: 'mauvais' });
+      .send({ login: 'inconnu1', password: 'mauvais' });
 
     expect(response.status).toBe(401);
     expect(response.text).toContain('Identifiant ou mot de passe incorrect');
@@ -68,13 +68,33 @@ describe('Écran de connexion', () => {
   it('affiche « ATTENTION : C’est votre dernier essai... » après 2 échecs', async () => {
     const agent = request.agent(app);
 
-    await agent.post('/connexion').type('form').send({ login: 'po', password: 'mauvais' });
+    await agent.post('/connexion').type('form').send({ login: 'inconnu2', password: 'mauvais' });
     const response = await agent
       .post('/connexion')
       .type('form')
-      .send({ login: 'po', password: 'mauvais' });
+      .send({ login: 'inconnu2', password: 'mauvais' });
 
     expect(response.text).toContain("ATTENTION : C'est votre dernier essai...");
+  });
+
+  it('bloque l’identifiant après le 3e échec, même avec le bon mot de passe', async () => {
+    const { app: freshApp } = createTestApp();
+    const attempt = (password: string) =>
+      request(freshApp).post('/connexion').type('form').send({ login: 'client', password });
+
+    await attempt('mauvais');
+    await attempt('mauvais');
+    await attempt('mauvais');
+    const blocked = await attempt('client123');
+
+    expect(blocked.status).toBe(429);
+    expect(blocked.text).toContain('cet identifiant est bloqué');
+    // Les autres identifiants ne sont pas concernés
+    const other = await request(freshApp)
+      .post('/connexion')
+      .type('form')
+      .send({ login: 'po', password: 'po123' });
+    expect(other.headers.location).toBe('/po');
   });
 
   it.each([

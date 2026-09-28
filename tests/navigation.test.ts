@@ -43,18 +43,15 @@ describe('Espaces par rôle', () => {
     expect(response.text).not.toContain('href="/admin');
   });
 
-  // Écrans du menu pas encore développés
-  const comingSoon: [Role, string][] = [
-    ['po', '/po/impayes'],
-    ['po', '/po/statistiques'],
-    ['client', '/client/impayes'],
-    ['client', '/client/statistiques'],
-  ];
+  // Chaque lien du menu mène à un écran développé (plus aucune page « à venir »)
+  const menuLinks = (Object.keys(navigation) as Role[]).flatMap((role) =>
+    navigation[role].map((link): [Role, string] => [role, link.href]),
+  );
 
-  it.each(comingSoon)('%s : GET %s affiche une page « à venir »', async (role, url) => {
+  it.each(menuLinks)('%s : GET %s affiche un écran développé', async (role, url) => {
     const response = await (await loginAs(app, role)).get(url);
 
     expect(response.status).toBe(200);
-    expect(response.text).toContain('prochaine phase');
+    expect(response.text).not.toContain('prochaine phase');
   });
 });
