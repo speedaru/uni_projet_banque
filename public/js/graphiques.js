@@ -108,6 +108,17 @@
         responsive: options.responsive ?? true,
         maintainAspectRatio: false,
         animation: options.animation ?? true,
+        // Clic sur une part : options.surClic(motif), par exemple pour ouvrir la liste de ses impayés
+        onClick: (_evenement, elements) => {
+          if (options.surClic && elements.length > 0) {
+            options.surClic(donnees.motifs[elements[0].index]);
+          }
+        },
+        onHover: (evenement, elements) => {
+          if (options.surClic) {
+            evenement.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+          }
+        },
         plugins: {
           // legend: false masque la légende (PDF : le tableau voisin reprend couleurs et libellés)
           legend: {

@@ -7,11 +7,19 @@ const roundCents = (amount: number) => Math.round(amount * 100) / 100;
 
 // Transactions impayées correspondant aux critères
 function transactionWhere(filters: UnpaidFilters): Prisma.TransactionWhereInput {
-  const { siren, raisonSociale, dateDebut, dateFin, numeroDossier } = filters;
+  const { siren, raisonSociale, dateDebut, dateFin, numeroDossier, motifCode } = filters;
   return {
-    impaye: numeroDossier
-      ? { is: { numeroDossier: { contains: numeroDossier, mode: 'insensitive' } } }
-      : { isNot: null },
+    impaye:
+      numeroDossier || motifCode
+        ? {
+            is: {
+              numeroDossier: numeroDossier
+                ? { contains: numeroDossier, mode: 'insensitive' }
+                : undefined,
+              motifCode,
+            },
+          }
+        : { isNot: null },
     remise: {
       siren,
       entreprise: raisonSociale
@@ -73,7 +81,7 @@ export const prismaUnpaidRepository: UnpaidRepository = {
     };
   },
 
-  async summaryBySiren({ siren, raisonSociale, dateDebut, dateFin, numeroDossier }) {
+  async summaryBySiren({ siren, raisonSociale, dateDebut, dateFin, numeroDossier, motifCode }) {
     const conditions = [Prisma.sql`TRUE`];
     if (siren) {
       conditions.push(Prisma.sql`e.siren = ${siren}`);
@@ -89,6 +97,9 @@ export const prismaUnpaidRepository: UnpaidRepository = {
     }
     if (numeroDossier) {
       conditions.push(Prisma.sql`i."numeroDossier" ILIKE ${`%${numeroDossier}%`}`);
+    }
+    if (motifCode) {
+      conditions.push(Prisma.sql`i."motifCode" = ${motifCode}`);
     }
 
     const rows = await prisma.$queryRaw<

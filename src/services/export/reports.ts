@@ -1,7 +1,8 @@
 import { formatIsoDate } from '../../lib/format';
 import type { RemiseFilters, RemiseRow } from '../remiseRepository';
 import type { TreasuryFilters, TreasuryRow } from '../treasuryRepository';
-import type { UnpaidFilters, UnpaidRow } from '../unpaidRepository';
+import { motifLabel } from '../../lib/motifs';
+import type { UnpaidFilters, UnpaidRow, UnpaidSummaryRow } from '../unpaidRepository';
 import { sumTreasury } from '../treasuryService';
 import { extractionLabel, fileDate, formatSiren, Report, reportTitle } from './report';
 
@@ -9,17 +10,18 @@ import { extractionLabel, fileDate, formatSiren, Report, reportTitle } from './r
 
 const sens = (amount: number) => (amount < 0 ? '-' : '+');
 
-// « DE L'ENTREPRISE DUPONT SARL N° SIREN 456 278 556 » quand une seule entreprise est concernée
-function companySubject(
+// « DE L'ENTREPRISE DUPONT SARL N° SIREN 456 278 556 » (Epic 5, US4) dès qu'une seule entreprise
+// est concernée : filtre sur le SIREN, ou résultats d'une seule entreprise (ex. filtre « Dupont »)
+export function companySubject(
   siren: string | undefined,
-  raisonSociale: string | undefined,
+  rows: { siren: string; raisonSociale: string }[],
   allLabel: string,
 ): string {
-  if (siren) {
-    return `de l'entreprise ${raisonSociale ?? ''} N° SIREN ${formatSiren(siren)}`.replace(
-      '  ',
-      ' ',
-    );
+  const sirens = new Set(rows.map((row) => row.siren));
+  const single = siren ?? (sirens.size === 1 ? rows[0].siren : undefined);
+  if (single) {
+    const name = rows.find((row) => row.siren === single)?.raisonSociale;
+    return `de l'entreprise ${name ? `${name} ` : ''}N° SIREN ${formatSiren(single)}`;
   }
   return allLabel;
 }
@@ -27,7 +29,7 @@ function companySubject(
 export function treasuryReport(filters: TreasuryFilters, rows: TreasuryRow[], now = new Date()) {
   const subject = companySubject(
     filters.siren,
-    rows[0]?.raisonSociale,
+    rows,
     filters.raisonSociale
       ? `des comptes clients « ${filters.raisonSociale} »`
       : 'de tous les comptes clients',
@@ -77,7 +79,7 @@ function periodLabel({ dateDebut, dateFin }: { dateDebut?: string; dateFin?: str
 export function remisesReport(filters: RemiseFilters, rows: RemiseRow[], now = new Date()) {
   const subject = companySubject(
     filters.siren,
-    rows[0]?.raisonSociale,
+    rows,
     filters.raisonSociale
       ? `des entreprises « ${filters.raisonSociale} »`
       : 'de toutes les entreprises',
@@ -120,16 +122,19 @@ export function unpaidReport(
 ) {
   const subject = companySubject(
     filters.siren,
-    rows[0]?.raisonSociale,
+    rows,
     filters.raisonSociale
       ? `des entreprises « ${filters.raisonSociale} »`
       : 'de toutes les entreprises',
   );
   const dossier = filters.numeroDossier ? ` (N° dossier : ${filters.numeroDossier})` : '';
+  const motif = filters.motifCode
+    ? ` — motif ${filters.motifCode} : ${motifLabel(filters.motifCode)}`
+    : '';
 
   const report: Report = {
     fileName: `impayes_${fileDate(now)}`,
-    title: reportTitle(`Liste des impayés ${subject}${periodLabel(filters)}${dossier}`),
+    title: reportTitle(`Liste des impayés ${subject}${periodLabel(filters)}${dossier}${motif}`),
     extractedAt: extractionLabel(now),
     columns: [
       { label: 'N° SIREN' },
@@ -154,6 +159,34 @@ export function unpaidReport(
       row.libelle,
     ]),
     totals: ['Total', '', '', '', '', '', 'EUR', totalAmount, `${rows.length} impayé(s)`],
+  };
+  return report;
+}
+
+// Somme des impayés par N° SIREN, écran du PO (Epic 3 US3, exportée pour l'Epic 5)
+export function unpaidSummaryReport(
+  filters: UnpaidFilters,
+  rows: UnpaidSummaryRow[],
+  now = new Date(),
+) {
+  const motif = filters.motifCode
+    ? ` — motif ${filters.motifCode} : ${motifLabel(filters.motifCode)}`
+    : '';
+  const scope = filters.raisonSociale ? ` des entreprises « ${filters.raisonSociale} »` : '';
+  const totalAmount = Math.round(rows.reduce((sum, row) => sum + row.totalAmount, 0) * 100) / 100;
+
+  const report: Report = {
+    fileName: `impayes_par_siren_${fileDate(now)}`,
+    title: reportTitle(`Somme des impayés par N° SIREN${scope}${periodLabel(filters)}${motif}`),
+    extractedAt: extractionLabel(now),
+    columns: [
+      { label: 'N° SIREN' },
+      { label: 'Raison sociale' },
+      { label: "Nombre d'impayés", type: 'integer' },
+      { label: 'Montant total', type: 'amount' },
+    ],
+    rows: rows.map((row) => [row.siren, row.raisonSociale, row.count, row.totalAmount]),
+    totals: ['Total', '', rows.reduce((sum, row) => sum + row.count, 0), totalAmount],
   };
   return report;
 }

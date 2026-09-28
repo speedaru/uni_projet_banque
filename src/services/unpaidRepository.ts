@@ -10,6 +10,8 @@ export interface UnpaidFilters {
   dateFin?: string;
   // Recherche partielle sur le N° de dossier impayé
   numeroDossier?: string;
+  // Code du motif d'impayé (01 à 08) : liste des impayés d'un motif (Epic 4, US5)
+  motifCode?: string;
 }
 
 // Tri des impayés (US2) : par date de remise (défaut) ou par montant de l'impayé.

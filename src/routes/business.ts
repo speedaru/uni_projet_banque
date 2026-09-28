@@ -38,6 +38,7 @@ export function createBusinessPagesRouter(prefix: '/po' | '/client', deps: Busin
   router.get(`${prefix}/remises/:numero/export`, remises.exportDetail);
   router.get(`${prefix}/impayes`, unpaid.page);
   router.get(`${prefix}/impayes/export`, unpaid.export);
+  router.get(`${prefix}/impayes/synthese/export`, unpaid.exportSummary);
   router.get(`${prefix}/statistiques`, stats.page);
   router.get(`${prefix}/statistiques/donnees`, stats.data);
   router.get(`${prefix}/statistiques/export`, stats.export);

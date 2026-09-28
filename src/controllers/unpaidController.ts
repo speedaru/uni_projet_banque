@@ -1,9 +1,10 @@
 import type { Request, Response } from 'express';
 
+import { MOTIFS_IMPAYES } from '../lib/motifs';
 import '../lib/session';
 import type { PdfRenderer } from '../services/export/pdfExport';
 import { parseExportFormat } from '../services/export/report';
-import { unpaidReport } from '../services/export/reports';
+import { unpaidReport, unpaidSummaryReport } from '../services/export/reports';
 import { sendReport } from '../services/export/sendReport';
 import type { Pagination } from '../services/remiseRepository';
 import { EXPORT_MAX_ROWS, PAGE_SIZES, pageCount, parsePagination } from '../services/remiseService';
@@ -93,6 +94,7 @@ export function createUnpaidController(unpaid: UnpaidRepository, renderPdf: PdfR
         }),
         amountBracket,
         amountBrackets: AMOUNT_BRACKETS,
+        motifs: MOTIFS_IMPAYES,
         exportParams: { ...params, tri: sort.key, ordre: sort.order },
         clientSiren: user.siren ?? '',
         clientRaisonSociale: result.rows[0]?.raisonSociale ?? '',
@@ -112,6 +114,19 @@ export function createUnpaidController(unpaid: UnpaidRepository, renderPdf: PdfR
         format,
         renderPdf,
       );
+    },
+
+    // Export de la somme des impayés par SIREN : tableau réservé au PO (Epic 3 US3)
+    async exportSummary(req: Request, res: Response) {
+      if (req.session.user!.role !== 'po') {
+        return res.status(403).send('Export réservé au Product Owner.');
+      }
+      const format = parseExportFormat(req.query.format);
+      const { filters, errors, summary } = await load(req, { page: 1, pageSize: 1 });
+      if (!format || errors.length > 0) {
+        return res.status(400).send(errors[0] ?? 'Format d’export invalide.');
+      }
+      await sendReport(res, unpaidSummaryReport(filters, summary), format, renderPdf);
     },
   };
 }

@@ -82,6 +82,15 @@ export function createStatsController(stats: StatsRepository, renderPdf: PdfRend
         errors: criteria.errors,
         dataUrl: `${base}/donnees?${query}`,
         pdfUrl: `${base}/export?${query}`,
+        // Liste des impayés d'un motif sur la même période (Epic 4, US5) : le code motif est ajouté au clic
+        unpaidListUrl: `${base.replace(/\/statistiques$/, '/impayes')}?${new URLSearchParams({
+          dateDebut: criteria.filters.dateDebut,
+          dateFin: criteria.filters.dateFin,
+          ...(!isClient && criteria.filters.siren ? { siren: criteria.filters.siren } : {}),
+          ...(criteria.filters.raisonSociale
+            ? { raisonSociale: criteria.filters.raisonSociale }
+            : {}),
+        })}`,
         clientSiren: user.siren ?? '',
       });
     },
